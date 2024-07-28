@@ -1,14 +1,15 @@
+"use client";
 import Link from "next/link";
 import { Button } from "@mui/material";
 import { ArrowRight } from "lucide-react";
 
 const ButtonLink = (props) => {
   return (
-    <Link
-      href={props.path}
-      // className="bg-blue-600 text-white py-2 px-4 rounded-sm w-fit"
-    >
-      <Button variant="contained">
+    <Link href={props.path}>
+      <Button
+        variant="contained"
+        className="btn_primary bg-primary text-primary_variant"
+      >
         {props.text} <ArrowRight />
       </Button>
     </Link>

@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+:root {
+  --plantation: #294744;
+  --gray-nurse: #e9ebe9;
+  --granny-smith: #849593;
+  --russett: #77605a;
+  --silver-sand: #b9c1c1;
+  --barley-corn: #a28e5c;
+  --indian-khaki: #c5b998;
+  --quicksand: #b99d90;
+  --cold-turkey: #d2c1bf;
+  --hippie-blue: #5c94b4;
+  --blue: #0956ae;
+}
+
+.h3 {
+  font-weight: 800;
+}
+
+.btn_primary {
+  // background: var(--plantation);
+  // color: var(--gray-nurse);
+  padding: 1rem 1.5rem;
+
+  &:hover {
+    background: var(--plantation);
+  }
+}
+
+.align-center {
+  align-items: center;
+}
+
+.transition-smooth {
+  transition: 0.4s ease;
+}
+
+.place-middle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+section {
+  margin: 2rem 0;
+  padding: 5rem 5% 3rem;
+  position: relative;
+}
+
+.tag {
+  position: relative;
+  width: fit-content;
+  color: var(--plantation);
+
+  &::before {
+    content: "";
+    z-index: -1;
+    position: absolute;
+    width: 4rem;
+    height: 4rem;
+    left: -30%;
+    top: -30%;
+    background: linear-gradient(
+      45deg,
+      var(--plantation),
+      var(--plantation),
+      white
+    );
+    transform: rotate(45deg);
+  }
+}
