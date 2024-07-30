@@ -1,0 +1,26 @@
+.auth_figure {
+  position: relative;
+
+  &::before {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    content: "";
+    width: 90%;
+    height: 90%;
+    border-radius: 100%;
+    border: 2px solid #294744;
+  }
+  &::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    content: "";
+    width: 60%;
+    height: 60%;
+    border-radius: 100%;
+    border: 2px solid #294744;
+  }
+}
