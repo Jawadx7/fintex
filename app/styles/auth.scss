@@ -1,6 +1,14 @@
 .auth_figure {
   position: relative;
 
+  .img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+  }
+
   &::before {
     position: absolute;
     top: 50%;
@@ -10,7 +18,7 @@
     width: 90%;
     height: 90%;
     border-radius: 100%;
-    border: 2px solid #294744;
+    border: 2px solid #47615f;
   }
   &::after {
     position: absolute;
@@ -21,6 +29,6 @@
     width: 60%;
     height: 60%;
     border-radius: 100%;
-    border: 2px solid #294744;
+    border: 2px solid #567471;
   }
 }

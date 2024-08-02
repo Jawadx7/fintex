@@ -14,7 +14,7 @@ const LoginForm = ({ setCurrentPage }) => {
   };
 
   return (
-    <>
+    <div>
       <h1 className="h3 text-[2rem]">Welcome Back,</h1>
       <p>Enter your email and password to receive a OTP.</p>
       <form className="mt-[3rem]">
@@ -59,7 +59,7 @@ const LoginForm = ({ setCurrentPage }) => {
           Sign Up
         </Button>
       </div>
-    </>
+    </div>
   );
 };
 

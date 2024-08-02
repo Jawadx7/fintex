@@ -11,7 +11,7 @@ const EmailVerification = () => {
   };
 
   return (
-    <>
+    <div>
       <h1 className="h2 text-[3rem]">Email Verification</h1>
       <form>
         <Button
@@ -23,7 +23,7 @@ const EmailVerification = () => {
           Submit
         </Button>
       </form>
-    </>
+    </div>
   );
 };
 

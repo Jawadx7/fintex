@@ -8,6 +8,7 @@ import SectionTag from "./components/SectionTag";
 import { useState } from "react";
 import { Badge, Globe, Star, CheckCircle } from "lucide-react";
 import heroimg from "../public/images/hero_pic.png";
+import person1 from "../public/images/person_1.jpg";
 
 export default function Home() {
   const [activetab, setActiveTab] = useState("tab1");
@@ -171,7 +172,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="w-full md:w-[80%] md:mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 mt-[2rem]">
+        <div className="w-full md:w-[80%] md:mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-[2rem] gap-3">
           <div className="rounded-[1rem] p-[1rem] shadow-md hover:bg-brown_light">
             <div className="mb-[3rem]">
               <Badge size={60} />
@@ -221,9 +222,40 @@ export default function Home() {
       </section>
 
       {/* Testomonial */}
-      <section id="testimonial">
-        <h1>Testomonial</h1>
-      </section>
+      <div
+        id="testimonial"
+        className="bg-primary text-white px-[5%] py-[3rem] my-[2rem]"
+      >
+        {/* top */}
+        <div className="flex align-center justify-between">
+          <div>
+            <h1 className="h3 text-[2.5rem]">Real Stories</h1>
+            <h1 className="h3 text-[2.5rem]">From Enterprenuers</h1>
+          </div>
+
+          <div>tab</div>
+        </div>
+
+        {/* post content */}
+        <div className="flex space-x-[5rem] my-[2rem] w-full mx-auto lg:w-[70%]">
+          {/* user details */}
+          <div className="flex-[1]">
+            <Image
+              src={person1}
+              alt=""
+              className="w-[5rem] h-[5rem] rounded-full"
+            />
+          </div>
+          {/* user post */}
+          <p className="flex-[6]">
+            "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ratione
+            sit necessitatibus debitis numquam delectus dolore alias doloribus
+            libero repellat! Quam laborum, ad expedita labore placeat facere
+            error repudiandae? Veniam nesciunt est dignissimos maiores delectus
+            vel repudiandae culpa, voluptatem ducimus nobis."
+          </p>
+        </div>
+      </div>
 
       {/* CTA */}
       <section id="cta">
