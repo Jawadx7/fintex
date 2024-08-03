@@ -11,6 +11,7 @@
 
 :root {
   --plantation: #294744;
+  // --plantati: #0f3531d1;
   --gray-nurse: #e9ebe9;
   --granny-smith: #849593;
   --russett: #77605a;
@@ -43,6 +44,9 @@
 
 .transition-smooth {
   transition: 0.4s ease;
+}
+.transition-smooth-slow {
+  transition: 0.6s ease;
 }
 
 .place-middle {
