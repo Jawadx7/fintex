@@ -25,7 +25,6 @@ const Navbar = () => {
       >
         <Menu />
       </Button>
-
       <div className={`menu ${shownav === "closed" ? "closed" : "opened"}`}>
         <Button
           variant="text"

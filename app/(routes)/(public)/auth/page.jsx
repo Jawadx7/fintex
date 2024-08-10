@@ -22,7 +22,7 @@ const AuthPage = () => {
         )}
       </div>
       <div className="auth_figure hidden md:block w-full h-full place-middle">
-        <Image src={img} alt="auth image" className="img" />
+        <Image src={img} alt="auth image" className="img z-10" />
       </div>
     </main>
   );

@@ -1,0 +1,40 @@
+.dashboard {
+  .dashboard_left {
+    overflow-y: scroll;
+
+    &::-webkit-scrollbar {
+      width: 5px;
+      display: none;
+    }
+    &::-webkit-scrollbar-track {
+      background: rgb(174, 246, 174);
+    }
+    &::-webkit-scrollbar-thumb {
+      background: green;
+    }
+  }
+  .dashboard_right {
+    overflow-y: scroll;
+
+    &::-webkit-scrollbar {
+      width: 5px;
+      display: none;
+    }
+  }
+
+  @media screen and (width <= 900px) {
+    .dashboard_left {
+      overflow-y: auto;
+    }
+    .dashboard_right {
+      overflow-y: auto;
+    }
+  }
+}
+
+.card {
+  background: url("../../public/images/banner.jpeg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}

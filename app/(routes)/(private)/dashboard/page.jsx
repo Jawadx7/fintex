@@ -10,12 +10,17 @@ import PaymentsAndTransfers from "../../../pages/paymentsNtransfers/Payments_Tra
 
 const DashBoard = () => {
   const [activePage, setActivePage] = useState("Dashboard");
+  const [sidebarStatus, setSidebarStatus] = useState("closed");
   return (
     <>
-      <DashboardNavbar />
+      <DashboardNavbar setSidebarStatus={setSidebarStatus} />
       <div className="flex">
-        <Sidebar setActivePage={setActivePage} />
-        <main className="pl-[17rem] pt-[5rem]">
+        <Sidebar
+          setActivePage={setActivePage}
+          setSidebarStatus={setSidebarStatus}
+          sidebarStatus={sidebarStatus}
+        />
+        <main className="h-[100vh] overflow-auto md:overflow-hidden flex-[5] px-2 pt-20">
           {activePage === "Dashboard" ? (
             <UserDashboard />
           ) : activePage === "Transactions" ? (
