@@ -248,11 +248,11 @@ export default function Home() {
           </div>
           {/* user post */}
           <p className="flex-[6]">
-            "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ratione
+            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ratione
             sit necessitatibus debitis numquam delectus dolore alias doloribus
             libero repellat! Quam laborum, ad expedita labore placeat facere
             error repudiandae? Veniam nesciunt est dignissimos maiores delectus
-            vel repudiandae culpa, voluptatem ducimus nobis."
+            vel repudiandae culpa, voluptatem ducimus nobis.
           </p>
         </div>
       </div>

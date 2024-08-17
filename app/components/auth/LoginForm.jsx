@@ -49,7 +49,7 @@ const LoginForm = ({ setCurrentPage }) => {
       </form>
 
       <div className="place-middle mt-[2rem]">
-        <span>Don't have an account?</span>
+        <span>Don&apos;t have an account?</span>
         <Button
           variant="text"
           type="submit"

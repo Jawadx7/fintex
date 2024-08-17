@@ -123,6 +123,7 @@ const UserDashboard = () => {
           <div className="flex flex-wrap align-center space-x-2 my-3">
             {quick_transfers.map((person) => (
               <Image
+                key={Math.random() * 20}
                 src={person.image}
                 alt="person image"
                 className="w-10 h-10 rounded-full cursor-pointer"
