@@ -46,6 +46,9 @@ const Navbar = () => {
           <li>
             <a href="#faqs">FAQs</a>
           </li>
+          <li>
+            <a href="/dashboard">Dashboard</a>
+          </li>
         </ul>
 
         <Link href="/auth">

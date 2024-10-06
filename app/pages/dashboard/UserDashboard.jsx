@@ -23,7 +23,7 @@ const UserDashboard = () => {
       {/* left account info */}
       <div className="dashboard_left flex-[4] p-2 py-2 md:h-[90vh]">
         {/* top cash amount boxes */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-4">
           {/* balance */}
           <div className="shadow-md p-3 rounded-md bg-white hover:bg-primary text-primary hover:text-white transition-smooth cursor-default relative">
             <MoreVertical className="absolute top-2 right-2 cursor-pointer" />

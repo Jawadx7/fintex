@@ -21,10 +21,13 @@ const Sidebar = ({ setActivePage, setSidebarStatus, sidebarStatus }) => {
         sidebarStatus === "opened" ? "left-0" : "left-[-100%]"
       } lg:relative flex-[3] lg:flex-[1]`}
     >
-      <div className="flex align-center space-x-2 mx-[1rem] mt-[1rem]">
+      <Link
+        href="/"
+        className="flex align-center space-x-2 mx-[1rem] mt-[1rem]"
+      >
         <Image src={logo} alt="" width={30} />
         <h1 className="h3 text-[1.3rem]">Fintex</h1>
-      </div>
+      </Link>
 
       <ArrowLeftCircle
         size={30}
