@@ -10,7 +10,7 @@ const Hero = () => {
   return (
     <div
       id="home"
-      className="bg-gray-200 w-full h-fit md:h-[55vh] lg:h-[100vh] grid grid-cols-1 md:grid-cols-2 align-center gap-2"
+      className="bg-gray-100 w-full h-fit md:h-[55vh] lg:h-[100vh] grid grid-cols-1 md:grid-cols-2 align-center gap-2"
     >
       <div className="h-full pt-[6rem] px-[5%] flex align-start justify-center flex-col">
         <h1 className="text-[2rem] lg:text-[3.5rem] capitalize">

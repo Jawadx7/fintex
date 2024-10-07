@@ -72,7 +72,7 @@ const Navbar = () => {
             </li>
           ))}
         </ul>
-        <Link href="/auth">
+        <Link href="/auth/signup">
           <PrimaryButton text="Get Started" />
         </Link>
       </div>

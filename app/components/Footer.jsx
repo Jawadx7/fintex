@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Button, TextField } from "@mui/material";
+import { StarIcon } from "lucide-react";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -43,11 +44,18 @@ const Footer = () => {
       <div className="flex-[3] px-5">
         <h3 className="text-3xl font-bold">Fintex</h3>
         <small className="text-gray-500">
-          Lorem ipsum dolor sit amet consectetur.
+          Financial Solutions at Your Fingertips
         </small>
 
-        <div className="my-10 py-5 px-3 border-y-2 border-dashed border-gray-300 w-full sm:w-2/3">
-          <small className="text-gray-500">357 Reviews</small>
+        <div className="my-10 py-5 px-3 border-y-2 border-dashed border-gray-300 w-full sm:w-2/3 flex align-center">
+          <div className="flex align-center space-x-1 flex-[1] border-r-2 border-gray-400">
+            <StarIcon size={20} />
+            <StarIcon size={20} />
+            <StarIcon size={20} />
+            <StarIcon size={20} />
+            <StarIcon size={20} />
+          </div>
+          <small className="text-gray-500 flex-[1] pl-3">357 Reviews</small>
         </div>
 
         <form>
@@ -70,7 +78,8 @@ const Footer = () => {
           </Button>
         </form>
         <small className="text-gray-500">
-          Lorem ipsum dolor sit amet consectetur.
+          By submitting this form you agree that we may collect and process your
+          data.
         </small>
       </div>
       <div className="flex-[5] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:mt-0 mt-10">

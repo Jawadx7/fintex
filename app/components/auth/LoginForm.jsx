@@ -1,47 +1,42 @@
 "use client";
 import { useState } from "react";
 import { Button, TextField } from "@mui/material";
+import Link from "next/link";
+import Input from "../../components/Input";
 
-const LoginForm = ({ setCurrentPage }) => {
+const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = (e) => {
     e.preventDefault();
-    console.log(email, password);
-    setCurrentPage("emailverification");
   };
 
   return (
     <div>
       <h1 className="h3 text-[2rem]">Welcome Back,</h1>
-      <p>Enter your email and password to receive a OTP.</p>
-      <form className="mt-[3rem]">
-        <TextField
+      <small className="text-gray-500">Please enter your details ...</small>
+      <form className="mt-5" onSubmit={handleLogin}>
+        <Input
           type="email"
+          id="email"
+          name="email"
           label="Email"
-          variant="outlined"
-          fullWidth
-          required
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mb-[2rem]"
+          setValue={setEmail}
         />
-        <TextField
+        <Input
           type="password"
+          id="password"
+          name="password"
           label="Password"
-          variant="outlined"
-          fullWidth
-          required
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mb-[2rem]"
+          setValue={setPassword}
         />
         <Button
           type="submit"
           variant="contained"
-          className="btn_primary bg-primary text-white w-full"
-          onClick={handleLogin}
+          className="hover:bg-primary mt-5 bg-primary text-white w-full"
         >
           LogIn
         </Button>
@@ -49,14 +44,11 @@ const LoginForm = ({ setCurrentPage }) => {
 
       <div className="place-middle mt-[2rem]">
         <span>Don&apos;t have an account?</span>
-        <Button
-          variant="text"
-          type="submit"
-          className="text-primary"
-          onClick={() => setCurrentPage("signup")}
-        >
-          Sign Up
-        </Button>
+        <Link href="/auth/signup">
+          <Button variant="text" type="submit" className="text-primary">
+            Sign Up
+          </Button>
+        </Link>
       </div>
     </div>
   );

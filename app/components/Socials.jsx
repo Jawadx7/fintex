@@ -23,7 +23,9 @@ const Socials = () => {
     <ul className="flex align-center space-x-3 my-3">
       {socials.map((item) => (
         <li key={item.name}>
-          <Link href={item.path}>{item.icon}</Link>
+          <Link href={item.path} target="_blank">
+            {item.icon}
+          </Link>
         </li>
       ))}
     </ul>
