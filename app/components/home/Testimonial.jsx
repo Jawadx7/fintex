@@ -47,7 +47,7 @@ const Testimonial = () => {
         className="flex-[3] mt-5 lg:mt-0"
       >
         {testimonials.map((testimonyItem) => (
-          <TestimonyCard testimonyItem={testimonyItem} />
+          <TestimonyCard key={testimonyItem.id} testimonyItem={testimonyItem} />
         ))}
       </Carousel>
     </div>
