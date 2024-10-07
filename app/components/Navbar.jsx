@@ -11,6 +11,33 @@ import logo from "../../public/images/logo.ico";
 
 const Navbar = () => {
   const [shownav, setShowNav] = useState("closed");
+
+  const navLinks = [
+    {
+      text: "About",
+      path: "#hero",
+    },
+    {
+      text: "Features",
+      path: "#fitures",
+    },
+    {
+      text: "Benefits",
+      path: "#benefits",
+    },
+    {
+      text: "Testimonial",
+      path: "#testimonial",
+    },
+    {
+      text: "FAQs",
+      path: "#faqs",
+    },
+    {
+      text: "Dashboard",
+      path: "/dashboard",
+    },
+  ];
   return (
     <header className="flex align-center px-[5%] py-[1rem] shadow-md bg-white z-10">
       <div className="logo flex align-center">
@@ -20,7 +47,7 @@ const Navbar = () => {
 
       <Button
         variant="text"
-        className="menu_btn text-center text-[#294744]"
+        className="menu_btn text-center text-primary"
         onClick={() => setShowNav("opened")}
       >
         <Menu />
@@ -33,24 +60,14 @@ const Navbar = () => {
         >
           <X />
         </Button>
-        <ul>
-          <li>
-            <a href="#hero">About</a>
-          </li>
-          <li>
-            <a href="#howitworks">How It Works</a>
-          </li>
-          <li>
-            <a href="#testimonial">Testimonial</a>
-          </li>
-          <li>
-            <a href="#faqs">FAQs</a>
-          </li>
-          <li>
-            <a href="/dashboard">Dashboard</a>
-          </li>
-        </ul>
 
+        <ul>
+          {navLinks.map((link) => (
+            <li key={link.text}>
+              <a href={link.path}>{link.text}</a>
+            </li>
+          ))}
+        </ul>
         <Link href="/auth">
           <PrimaryButton text="Get Started" />
         </Link>

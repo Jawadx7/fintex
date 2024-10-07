@@ -5,7 +5,7 @@ const PrimaryButton = ({ text }) => {
   return (
     <Button
       variant="contained"
-      className="btn_primary bg-primary text-primary_variant"
+      className="hover:bg-primary w-fit bg-primary text-primary_variant"
     >
       {text}
     </Button>
