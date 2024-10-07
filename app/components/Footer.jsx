@@ -36,7 +36,10 @@ const Footer = () => {
   ];
 
   return (
-    <div className="mt-5 px-[5%] py-20 flex-col md:flex-row flex md:space-x-5">
+    <footer
+      id="footer"
+      className="mt-5 px-[5%] py-20 flex-col md:flex-row flex md:space-x-5"
+    >
       <div className="flex-[3] px-5">
         <h3 className="text-3xl font-bold">Fintex</h3>
         <small className="text-gray-500">
@@ -88,7 +91,7 @@ const Footer = () => {
           </div>
         ))}
       </div>
-    </div>
+    </footer>
   );
 };
 

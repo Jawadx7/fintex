@@ -29,14 +29,15 @@ const Testimonial = () => {
   return (
     <div
       id="testimonial"
-      className="flex-col lg:flex-row lg:flex align-center bg-primary text-white px-[5%] py-[3rem] my-[3rem]"
+      className="flex-col lg:flex-row lg:flex align-center bg-primary text-white px-[5%] py-[5rem] my-[3rem]"
     >
       <div className="flex-[1] px-3">
         {/* <h1 className="h3 text-xl md:text-4xl">Real Stories</h1> */}
         <h1 className="mb-5 text-4xl">Real Stories From Enterprenuers</h1>
         <p className="lg:text-base text-xl">
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Unde
-          corporis officia.
+          Discover inspiring journeys from entrepreneurs who have transformed
+          their dreams into reality. These stories showcase the impact of
+          innovative financial solutions.
         </p>
       </div>
       <Carousel

@@ -1,47 +1,47 @@
-import person1 from "../images/person_1.jpg";
-import person2 from "../images/person_2.jpg";
-import person3 from "../images/person_3.jpg";
-import person4 from "../images/person_4.jpg";
+import Tobirama from "../images/tobirama.jpeg";
+import Akashi from "../images/Akashi.jpeg";
+import AllMight from "../images/All-Might.jpeg";
+import Boruto from "../images/boruto-baby.jpeg";
 
 export const testimonials = [
   {
     id: 1,
-    image: person1,
+    image: Tobirama,
     name: "Tobirama Senju",
     position: "Senior Manager",
-    company: "Tribal.com",
+    company: "TribalPay Solutions",
     comment:
-      "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Qui est repellat cupiditate odio consectetur quae voluptate culpa ullam vero dolorem!",
+      "Using this platform has completely transformed how our business handles payments. The efficiency and security features are unmatched, and we've seen significant improvement in processing times.",
     date: "Dec 25, 2023",
   },
   {
     id: 2,
-    image: person2,
-    name: "Akashi Kiora",
+    image: Akashi,
+    name: "Akashi",
     position: "Accounting Manager",
-    company: "Miracles.com",
+    company: "Miracle Finance",
     comment:
-      "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Qui est repellat cupiditate odio consectetur quae voluptate culpa ullam vero dolorem!",
+      "This fintech platform has made managing our finances so much easier. The real-time tracking and automated payments have been a game changer for our accounting team.",
     date: "Oct 09, 2023",
   },
   {
     id: 3,
-    image: person3,
-    name: "Might Guy",
-    position: "Finanace Expert",
-    company: "Youth.com",
+    image: AllMight,
+    name: "All Might",
+    position: "Finance Expert",
+    company: "Youth Capital",
     comment:
-      "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Qui est repellat cupiditate odio consectetur quae voluptate culpa ullam vero dolorem!",
+      "I was impressed with how intuitive the platform is. The virtual cards feature is a brilliant addition that allows for seamless online transactions without compromising on security.",
     date: "Jan 03, 2024",
   },
   {
     id: 4,
-    image: person4,
+    image: Boruto,
     name: "Uzumaki Boruto",
-    position: "Technology Officer",
-    company: "Jinchuriki.com",
+    position: "Chief Technology Officer",
+    company: "Jinchuriki Tech",
     comment:
-      "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Qui est repellat cupiditate odio consectetur quae voluptate culpa ullam vero dolorem!",
+      "Our company has benefited greatly from this platform’s scalability and secure infrastructure. It’s helped us streamline operations and reduce payment processing costs significantly.",
     date: "Apr 10, 2023",
   },
 ];

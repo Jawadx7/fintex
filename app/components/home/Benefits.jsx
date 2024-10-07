@@ -1,9 +1,13 @@
 "use client";
 
 import SectionTag from "../SectionTag";
-import { Badge } from "lucide-react";
+// import { DollarSign, CardCredit, ChartCandlestick } from "lucide-react";
+import { DollarSign, ChartCandlestick, CreditCard } from "lucide-react";
 import { useState } from "react";
-import PrimaryButton from "../PrimaryButton";
+import Image from "next/image";
+import PaymentsImg from "../../../public/images/vectors/transactions.svg";
+import CardsImg from "../../../public/images/vectors/credit_card.svg";
+import MoneyImg from "../../../public/images/vectors/personal_finance.svg";
 
 const Benefits = () => {
   const [activetab, setActiveTab] = useState("tab1");
@@ -15,9 +19,12 @@ const Benefits = () => {
           Make your spend, well spent
         </h1>
         <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti in
-          adipisci qui nesciunt provident iure doloribus quaerat accusamus
-          dicta? Iusto?
+          Optimize every transaction with tools designed to give you full
+          control over your spending. Our platform helps you track, manage, and
+          budget effortlessly, ensuring that every penny is spent with purpose.
+          From detailed spending insights to tailored recommendations, we
+          empower you to make informed financial decisions that align with your
+          goals.
         </p>
       </div>
 
@@ -30,12 +37,12 @@ const Benefits = () => {
               activetab === "tab1" ? "border-primary" : "border-white"
             } cursor-pointer`}
           >
-            <Badge size={50} />
+            <DollarSign size={50} />
             <div>
               <h3 className="h3 text">New Payment Stratgies</h3>
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Aspernatur.
+                Innovative solutions that offer flexibility, speed, and security
+                for modern transactions.
               </p>
             </div>
           </article>
@@ -45,12 +52,12 @@ const Benefits = () => {
               activetab === "tab2" ? "border-primary" : "border-white"
             } cursor-pointer`}
           >
-            <Badge size={50} />
+            <CreditCard size={50} />
             <div>
               <h3 className="h3 text">Virtual Cards</h3>
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Aspernatur.
+                Secure and manage your online purchases with instant virtual
+                cards designed for convenience.
               </p>
             </div>
           </article>
@@ -60,12 +67,12 @@ const Benefits = () => {
               activetab === "tab3" ? "border-primary" : "border-white"
             } cursor-pointer`}
           >
-            <Badge size={50} />
+            <ChartCandlestick size={50} />
             <div>
-              <h3 className="h3 text">Get Your Money Calculated</h3>
+              <h3 className="h3 text">Get Your Money on Track</h3>
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Aspernatur.
+                Track your spending in real-time and optimize your financial
+                management with ease.
               </p>
             </div>
           </article>
@@ -78,46 +85,49 @@ const Benefits = () => {
               activetab === "tab1" ? "block" : "hidden"
             }`}
           >
-            <h3 className="mt-[3rem] text-left text-5xl font-[100]">
-              New payments with swift, flexible, and reliable
+            <Image src={PaymentsImg} alt="payment-image" width={300} />
+            <h3 className="mt-[3rem] text-left text-4xl font-[500]">
+              New Payments with Swift, Flexible, and Reliable Solutions
             </h3>
             <p className="my-3 text-gray-600">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa rem,
-              delectus dicta quaerat quidem cum suscipit perferendis tempore
-              ullam laborum vel labore totam, voluptates dolores dolorem unde.
-              Minus, aliquid quo?
+              Experience the future of payments with a system designed to be
+              swift, flexible, and highly reliable. Our platform ensures
+              seamless financial transactions that adapt to your needs,
+              providing a smooth and secure payment process every time.
             </p>
-            <PrimaryButton text="See Details" />
           </div>
           <div
             className={`w-full h-full p-2 ${
               activetab === "tab2" ? "block" : "hidden"
             }`}
           >
-            <h3 className="mt-[3rem] text-left text-5xl font-[100]">
+            <Image src={CardsImg} alt="cards-image" width={180} />
+            <h3 className="mt-[3rem] text-left text-4xl font-[500]">
               Enjoy Our Virtual Credit Cards
             </h3>
             <p className="my-3 text-gray-600">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa rem,
-              delectus dicta quaerat quidem cum suscipit perferendis tempore
-              ullam laborum vel labore totam, voluptates dolores dolorem unde.
-              Minus, aliquid quo?
+              Unlock the convenience and security of our virtual credit cards.
+              Designed for your digital lifestyle, our cards offer instant
+              access to funds, enhanced protection, and full control over your
+              spending. Say goodbye to traditional cards and experience a
+              smarter, more flexible way to manage your finances.
             </p>
-            <PrimaryButton text="See Details" />
           </div>
           <div
             className={`w-full h-full p-2 ${
               activetab === "tab3" ? "block" : "hidden"
             }`}
           >
-            <h3 className="mt-[3rem] text-left text-5xl font-[100]">Tab 3</h3>
+            <Image src={MoneyImg} alt="personal-finance-image" width={170} />
+            <h3 className="mt-[3rem] text-left text-4xl font-[500]">
+              Seamless Money Management
+            </h3>
             <p className="my-3 text-gray-600">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa rem,
-              delectus dicta quaerat quidem cum suscipit perferendis tempore
-              ullam laborum vel labore totam, voluptates dolores dolorem unde.
-              Minus, aliquid quo?
+              Simplify your financial life with tools that allow you to track,
+              budget, and manage your money in real-time. Our platform ensures
+              that every penny is accounted for and working towards your
+              financial goals.
             </p>
-            <PrimaryButton text="See Details" />
           </div>
         </div>
       </div>

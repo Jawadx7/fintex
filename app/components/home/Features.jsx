@@ -1,33 +1,40 @@
 "use client";
 
 import SectionTag from "../SectionTag";
-import { Badge, CheckCircle } from "lucide-react";
+import {
+  Badge,
+  CheckCircle,
+  LockKeyhole,
+  FastForward,
+  Bot,
+} from "lucide-react";
+import { ArrowUpCircle } from "lucide-react";
 
 const Features = () => {
   const features = [
     {
       id: 1,
-      icon: "Img",
+      icon: <FastForward />,
       heading: "Fast",
-      text: "Automatically process transfers in real-time to maximize throughput efficiency",
+      text: "Automatically process transfers in real-time, maximizing throughput efficiency and minimizing delays.",
     },
     {
       id: 2,
-      icon: "Img",
+      icon: <Bot />,
       heading: "Instant",
-      text: "Fully automate the payment lifecycle without the need to custom coding",
+      text: "Fully automate the payment lifecycle, removing the need for manual intervention or custom coding.",
     },
     {
       id: 3,
-      icon: "Img",
+      icon: <LockKeyhole />,
       heading: "Secure",
-      text: "Eliminate concerns over risks such as insufficient funds and transaction failures",
+      text: "Mitigate risks such as insufficient funds and transaction failures, ensuring peace of mind with every payment.",
     },
     {
       id: 4,
-      icon: "Img",
+      icon: <ArrowUpCircle />,
       heading: "Build for Scale",
-      text: "Drive down costs, scale transactions and wield payments as a strength",
+      text: "Drive down costs, handle high transaction volumes effortlessly, and transform payments into a competitive strength.",
     },
   ];
   return (
@@ -40,8 +47,9 @@ const Features = () => {
           Finally, a better way to simplify payments
         </h1>
         <p className="lg:text-xl sm:text-3xl text-gray-600">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti in
-          adipisci.
+          We provide a seamless and efficient payment experience, designed to
+          take the hassle out of managing your financial transactions. Our
+          platform offers:
         </p>
       </div>
 
@@ -51,8 +59,9 @@ const Features = () => {
             key={featureItem.id}
             className="rounded-[1rem] p-[1rem] shadow-md hover:bg-brown_light"
           >
-            <div className="mb-[3rem]">
-              <Badge size={60} />
+            <div className="mb-3">
+              {/* <Badge size={60} /> */}
+              {featureItem.icon}
             </div>
 
             <h1 className="h3 text-[1.2rem]">{featureItem.heading}</h1>

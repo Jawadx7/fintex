@@ -1,14 +1,17 @@
 "use client";
 
-import heroimg from "../../../public/images/hero_pic.png";
 import Img1 from "../../../public/images/figure-1.png";
 import PrimaryButton from "../PrimaryButton";
-import { Globe, Star } from "lucide-react";
+// import { Globe, Star } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 const Hero = () => {
   return (
-    <div className="bg-gray-200 w-full h-fit lg:h-[100vh] grid grid-cols-1 lg:grid-cols-2 align-center gap-2">
+    <div
+      id="home"
+      className="bg-gray-200 w-full h-fit md:h-[55vh] lg:h-[100vh] grid grid-cols-1 md:grid-cols-2 align-center gap-2"
+    >
       <div className="h-full pt-[6rem] px-[5%] flex align-start justify-center flex-col">
         <h1 className="text-[2rem] lg:text-[3.5rem] capitalize">
           Change the way you use your{" "}
@@ -26,7 +29,9 @@ const Hero = () => {
           finances with ease and efficiency.
         </p>
 
-        <PrimaryButton text="Contact US" />
+        <Link href="#footer">
+          <PrimaryButton text="Contact US" />
+        </Link>
       </div>
       <div className="flex align-center justify-center">
         <Image src={Img1} alt="Image" width={800} />

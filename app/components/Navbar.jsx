@@ -14,8 +14,12 @@ const Navbar = () => {
 
   const navLinks = [
     {
+      text: "Home",
+      path: "#home",
+    },
+    {
       text: "About",
-      path: "#hero",
+      path: "#about",
     },
     {
       text: "Features",

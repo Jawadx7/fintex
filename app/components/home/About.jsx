@@ -1,18 +1,19 @@
-import Img from "../../../public/images/figure-1.png";
+import Img from "../../../public/images/vectors/about-us.svg";
 
 import Image from "next/image";
 import Socials from "../Socials";
 
 const About = () => {
   return (
-    <section className="flex md:flex-row flex-col-reverse align-center space-x-5">
+    <section
+      id="about"
+      className="flex lg:flex-row flex-col-reverse align-center md:space-x-5"
+    >
       <div className="flex-[1] flex align-center justify-center">
         <Image src={Img} alt="Image" />
       </div>
       <div className="flex-[1]">
-        <h1 className="mt-[3rem] text-[2rem] sm:text-[3rem]">
-          About The Company
-        </h1>
+        <h1 className="text-[2rem] sm:text-[3rem]">About The Company</h1>
 
         <p className="mb-[1rem]">
           We are a fintech company dedicated to transforming the way people
