@@ -9,7 +9,7 @@ const FAQs = () => {
       <h1 className="text-5xl font-[500] text-center text-primary">FAQs</h1>
       <article className="w-full sm:w-1/2 mt-5">
         <h3 className="font-bold text-xl">
-          Have questions? We've got answers.
+          Have questions? We have got answers.
         </h3>
       </article>
 

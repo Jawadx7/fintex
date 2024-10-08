@@ -46,10 +46,12 @@ const PaymentsAndTransfers = () => {
         </small>
       </article>
       <article className="py-4 border-b-2 border-gray-200">
-        <small className="text-gray-500">Recipient's email address</small>
+        <small className="text-gray-500">Recipient&apos;s email address</small>
       </article>
       <article className="py-4 border-b-2 border-gray-200">
-        <small className="text-gray-500">Recipient's bank account number</small>
+        <small className="text-gray-500">
+          Recipient&apos;s bank account number
+        </small>
       </article>
       <article className="py-4 border-b-2 border-gray-200">
         <small className="text-gray-500">Amount</small>

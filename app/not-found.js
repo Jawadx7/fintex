@@ -8,7 +8,7 @@ import NotFoundImg from "../public/images/vectors/404.svg";
 const NotFound = () => {
   return (
     <div className="flex align-center justify-center flex-col p-5">
-      <Image src={NotFoundImg} width={500} />
+      <Image src={NotFoundImg} width={500} alt="page-not-found" />
       <h1 className="text-base sm:text-2xl font-[300] my-5">
         The Page You Requested Was Not Found
       </h1>
