@@ -8,12 +8,9 @@ const FAQs = () => {
     >
       <h1 className="text-5xl font-[500] text-center text-primary">FAQs</h1>
       <article className="w-full sm:w-1/2 mt-5">
-        <h3 className="font-bold text-xl">Frequently Asked Questions</h3>
-        <p className="text-[1rem] md:text-sm">
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Blanditiis
-          quo repellendus inventore at. Rem consequuntur nostrum architecto
-          error! Suscipit, libero.
-        </p>
+        <h3 className="font-bold text-xl">
+          Have questions? We've got answers.
+        </h3>
       </article>
 
       <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

@@ -18,59 +18,51 @@ import Card from "../../components/Card";
 import TransactionsSection from "./TransactionsSection";
 
 const UserDashboard = () => {
+  const account = [
+    {
+      id: 1,
+      name: "Balance",
+      amount: 2190,
+      icon: <Wallet size={30} color="white" />,
+    },
+    {
+      id: 2,
+      name: "Income",
+      amount: 2900,
+      icon: <HandCoins size={30} color="white" />,
+    },
+    {
+      id: 3,
+      name: "Savings",
+      amount: 500,
+      icon: <PiggyBank size={30} color="white" />,
+    },
+    {
+      id: 4,
+      name: "Expense",
+      amount: 210,
+      icon: <Coins size={30} color="white" />,
+    },
+  ];
   return (
     <div className="dashboard flex-col flex md:flex-row">
-      {/* left account info */}
       <div className="dashboard_left flex-[4] p-2 py-2 md:h-[90vh]">
-        {/* top cash amount boxes */}
         <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* balance */}
-          <div className="shadow-md p-3 rounded-md bg-white hover:bg-primary text-primary hover:text-white transition-smooth cursor-default relative">
-            <MoreVertical className="absolute top-2 right-2 cursor-pointer" />
-            <div className="place-middle bg-primary_fade w-12 h-12 rounded-full">
-              <Wallet size={30} color="white" />
+          {account.map((accountItem) => (
+            <div
+              key={accountItem.id}
+              className="shadow-md p-3 rounded-md bg-white hover:bg-primary text-primary hover:text-white transition-smooth cursor-default relative"
+            >
+              <MoreVertical className="absolute top-2 right-2 cursor-pointer" />
+              <div className="place-middle bg-primary_fade w-12 h-12 rounded-full">
+                {accountItem.icon}
+              </div>
+
+              <p className="my-3">{accountItem.name}</p>
+
+              <h1 className="h3 text-[2rem]">${accountItem.amount}</h1>
             </div>
-
-            <p className="my-3">Balance</p>
-
-            <h1 className="h3 text-[2rem]">$2190</h1>
-          </div>
-
-          {/* income */}
-          <div className="shadow-md p-3 rounded-md bg-white hover:bg-primary text-primary hover:text-white transition-smooth cursor-default relative">
-            <MoreVertical className="absolute top-2 right-2 cursor-pointer" />
-            <div className="place-middle bg-primary_fade w-12 h-12 rounded-full">
-              <HandCoins size={30} color="white" />
-            </div>
-
-            <p className="my-3">Income</p>
-
-            <h1 className="h3 text-[2rem]">$2900</h1>
-          </div>
-
-          {/* savings */}
-          <div className="shadow-md p-3 rounded-md bg-white hover:bg-primary text-primary hover:text-white transition-smooth cursor-default relative">
-            <MoreVertical className="absolute top-2 right-2 cursor-pointer" />
-            <div className="place-middle bg-primary_fade w-12 h-12 rounded-full">
-              <PiggyBank size={30} color="white" />
-            </div>
-
-            <p className="my-3">Savings</p>
-
-            <h1 className="h3 text-[2rem]">$500</h1>
-          </div>
-
-          {/* expense */}
-          <div className="shadow-md p-3 rounded-md bg-white hover:bg-primary text-primary hover:text-white transition-smooth cursor-default relative">
-            <MoreVertical className="absolute top-2 right-2 cursor-pointer" />
-            <div className="place-middle bg-primary_fade w-12 h-12 rounded-full">
-              <Coins size={30} color="white" />
-            </div>
-
-            <p className="my-3">Expenses</p>
-
-            <h1 className="h3 text-[2rem]">$210</h1>
-          </div>
+          ))}
         </div>
 
         {/* Analytics and Budget */}
@@ -79,7 +71,7 @@ const UserDashboard = () => {
         <TransactionsSection />
       </div>
 
-      {/* right - other tools for account andtransfers */}
+      {/* right - other tools for account and transfers */}
       <div className="dashboard_right flex-[2] pb-2 mb-3 md:mb-0 sm:px-3 md:mt-0 mt-5 h-fit md:h-[90vh]">
         <div className="shadow-md bg-white rounded-md p-3 mb-3">
           <div className="flex align-center justify-between">

@@ -9,12 +9,7 @@ import { link_tabs } from "../../../public/data/sidebar_tabs";
 import { useState } from "react";
 import { ArrowLeftCircle } from "lucide-react";
 
-const Sidebar = ({ setActivePage, setSidebarStatus, sidebarStatus }) => {
-  const [activeTab, setActiveTab] = useState("Dashboard");
-  const handleActiveTab = (e) => {
-    setActiveTab(e.target.innerText);
-    setActivePage(e.target.innerText);
-  };
+const Sidebar = ({ activeTab, setSidebarStatus, sidebarStatus }) => {
   return (
     <div
       className={`overflow-y-scroll lg:overflow-hidden h-[100vh] py-[1rem] bg-white shadow-md z-10 transition-smooth w-[70%] sm:w-[40%] lg:w-auto fixed top-0 lg:left-0 ${
@@ -40,16 +35,18 @@ const Sidebar = ({ setActivePage, setSidebarStatus, sidebarStatus }) => {
           <small className="text-primary_fade m-[15px]">Menu</small>
           <ul>
             {account_tabs.map((tab) => (
-              <li
+              <Link
+                href={`/application/${tab.id}`}
                 key={Math.random() * 10}
                 className={`flex align-center space-x-2 text-primary hover:bg-primary_fade p-[1rem] hover:text-white cursor-pointer ${
-                  activeTab === tab.name ? "bg-primary text-white" : ""
+                  activeTab.toLowerCase() === tab.id
+                    ? "bg-primary text-white"
+                    : ""
                 }`}
-                onClick={handleActiveTab}
               >
                 <span>{tab.icon}</span>
                 <small className="text-[14px]">{tab.name}</small>
-              </li>
+              </Link>
             ))}
           </ul>
 
@@ -57,16 +54,18 @@ const Sidebar = ({ setActivePage, setSidebarStatus, sidebarStatus }) => {
           <small className="text-primary_fade m-[15px]">Tools</small>
           <ul>
             {tools_tabs.map((tab) => (
-              <li
+              <Link
+                href={`/application/${tab.id}`}
                 key={Math.random() * 10}
                 className={`flex align-center space-x-2 text-primary hover:bg-primary_fade p-[1rem] hover:text-white cursor-pointer ${
-                  activeTab === tab.name ? "bg-primary text-white" : ""
+                  activeTab.toLowerCase() === tab.id
+                    ? "bg-primary text-white"
+                    : ""
                 }`}
-                onClick={handleActiveTab}
               >
                 <span>{tab.icon}</span>
                 <small className="text-[14px]">{tab.name}</small>
-              </li>
+              </Link>
             ))}
 
             <div className="w-[90%] h-[1.5px] bg-primary my-[1rem] mx-auto"></div>

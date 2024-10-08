@@ -48,12 +48,12 @@ const Footer = () => {
         </small>
 
         <div className="my-10 py-5 px-3 border-y-2 border-dashed border-gray-300 w-full sm:w-2/3 flex align-center">
-          <div className="flex align-center space-x-1 flex-[1] border-r-2 border-gray-400">
-            <StarIcon size={20} />
-            <StarIcon size={20} />
-            <StarIcon size={20} />
-            <StarIcon size={20} />
-            <StarIcon size={20} />
+          <div className="flex align-center pr-3 flex-[1] border-r-2 border-gray-400">
+            <StarIcon size={18} />
+            <StarIcon size={18} />
+            <StarIcon size={18} />
+            <StarIcon size={18} />
+            <StarIcon size={18} />
           </div>
           <small className="text-gray-500 flex-[1] pl-3">357 Reviews</small>
         </div>

@@ -3,14 +3,17 @@ import { PieChart, ChartLine, Brain } from "lucide-react";
 
 export const account_tabs = [
   {
+    id: "dashboard",
     name: "Dashboard",
     icon: <Home />,
   },
   {
+    id: "transactions",
     name: "Transactions",
     icon: <Receipt />,
   },
   {
+    id: "payment_transfers",
     name: "Payment & Transfers",
     icon: <ArrowRightCircle />,
   },
@@ -18,18 +21,22 @@ export const account_tabs = [
 
 export const tools_tabs = [
   {
+    id: "budgets",
     name: "Budgets",
     icon: <PieChart />,
   },
   {
+    id: "investments",
     name: "Investments",
     icon: <ChartLine />,
   },
   {
+    id: "data_visualization",
     name: "Data Visualization",
     icon: <ChartBar />,
   },
   {
+    id: "financial_advisor",
     name: "Financial Advisor",
     icon: <Brain />,
   },

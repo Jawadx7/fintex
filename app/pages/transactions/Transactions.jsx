@@ -8,7 +8,7 @@ const Transactions = () => {
       <div className="w-full flex flex-col md:flex-row">
         {/* balance */}
         <div className="flex-[1]">
-          <p className="m-3 text-primary">Total Balance</p>
+          {/* <p className="m-3 text-primary">Total Balance</p> */}
           <div className="h-auto shadow-md p-3 rounded-md bg-white hover:bg-primary text-primary hover:text-white transition-smooth cursor-default relative">
             {/* <MoreVertical className="absolute top-2 right-2 cursor-pointer" /> */}
             <p className="my-3">All Time</p>
@@ -23,7 +23,7 @@ const Transactions = () => {
 
         {/* Transactions */}
         <div className="flex-[3]">
-          <p className="m-3 text-primary">Transactions</p>
+          {/* <p className="m-3 text-primary">Transactions</p> */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:ml-2 ml-0">
             <div className="flex-[3] shadow-md p-3 rounded-md bg-white hover:bg-primary text-primary hover:text-white transition-smooth cursor-default relative">
               <div className="flex align-center space-x-3">

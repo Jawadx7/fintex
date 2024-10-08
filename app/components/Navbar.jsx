@@ -39,7 +39,7 @@ const Navbar = () => {
     },
     {
       text: "Dashboard",
-      path: "/dashboard",
+      path: "/application/dashboard",
     },
   ];
   return (
