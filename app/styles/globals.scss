@@ -83,3 +83,16 @@ section {
     transform: rotate(45deg);
   }
 }
+
+.styled_srollbar {
+  &::-webkit-scrollbar {
+    width: 5px;
+    display: none;
+  }
+  &::-webkit-scrollbar-track {
+    background: rgb(174, 246, 174);
+  }
+  &::-webkit-scrollbar-thumb {
+    background: green;
+  }
+}

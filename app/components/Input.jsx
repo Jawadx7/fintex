@@ -1,10 +1,15 @@
 const Input = ({ type, id, name, label, value, setValue }) => {
   return (
     <div>
-      <label className="text-[13px] font-semibold" htmlFor={id}>
-        {label}
-      </label>
-      <br />
+      {label && (
+        <div>
+          <label className="text-[13px] font-semibold" htmlFor={id}>
+            {label}
+          </label>
+          <br />
+        </div>
+      )}
+
       <input
         type={type}
         id={id}
