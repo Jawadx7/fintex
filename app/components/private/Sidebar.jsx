@@ -12,7 +12,7 @@ import { ArrowLeftCircle } from "lucide-react";
 const Sidebar = ({ activeTab, setSidebarStatus, sidebarStatus }) => {
   return (
     <div
-      className={`overflow-y-scroll lg:overflow-hidden h-[100vh] py-[1rem] bg-white shadow-md z-10 transition-smooth w-[70%] sm:w-[40%] lg:w-auto fixed top-0 lg:left-0 ${
+      className={`styled_srollbar overflow-y-scroll h-[100vh] py-[1rem] bg-white shadow-md z-10 transition-smooth w-[70%] sm:w-[40%] lg:w-auto fixed top-0 lg:left-0 ${
         sidebarStatus === "opened" ? "left-0" : "left-[-100%]"
       } lg:relative flex-[3] lg:flex-[1]`}
     >

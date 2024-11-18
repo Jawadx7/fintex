@@ -344,8 +344,8 @@ export default function EnhancedTable() {
                           row.status === "success"
                             ? "text-white bg-primary_fade"
                             : row.status === "pending"
-                            ? "bg-gold_fade text-primary"
-                            : "text-red-500"
+                              ? "bg-gold_fade text-primary"
+                              : "text-red-500"
                         }`}
                       >
                         {row.status}
