@@ -37,7 +37,7 @@ const Sidebar = ({ activeTab, setSidebarStatus, sidebarStatus }) => {
             {account_tabs.map((tab) => (
               <Link
                 href={`/application/${tab.id}`}
-                key={Math.random() * 10}
+                key={tab.id}
                 className={`flex align-center space-x-2 text-primary hover:bg-primary_fade p-[1rem] hover:text-white cursor-pointer ${
                   activeTab.toLowerCase() === tab.id
                     ? "bg-primary text-white"
@@ -56,7 +56,7 @@ const Sidebar = ({ activeTab, setSidebarStatus, sidebarStatus }) => {
             {tools_tabs.map((tab) => (
               <Link
                 href={`/application/${tab.id}`}
-                key={Math.random() * 10}
+                key={tab.id}
                 className={`flex align-center space-x-2 text-primary hover:bg-primary_fade p-[1rem] hover:text-white cursor-pointer ${
                   activeTab.toLowerCase() === tab.id
                     ? "bg-primary text-white"
@@ -74,8 +74,7 @@ const Sidebar = ({ activeTab, setSidebarStatus, sidebarStatus }) => {
             <ul className="mx-[10px]">
               {link_tabs.map((item) => (
                 <li
-                  href={item.path}
-                  key={Math.random() * 10}
+                  key={item.name}
                   className="cursor-pointer group relative my-[5px] w-fit"
                 >
                   {item.path && (

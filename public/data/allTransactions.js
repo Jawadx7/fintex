@@ -208,7 +208,7 @@ export const all_transactions = [
   },
   {
     name: "Jugo",
-    id: 293847,
+    id: 293851,
     type: "send",
     amount: 420,
     date: "4 days ago",
@@ -262,7 +262,7 @@ export const all_transactions = [
   },
   {
     name: "Kurenai",
-    id: 273645,
+    id: 273648,
     type: "received",
     amount: 950,
     date: "1 week ago",
@@ -361,7 +361,7 @@ export const all_transactions = [
   },
   {
     name: "Minato",
-    id: 374829,
+    id: 374826,
     type: "send",
     amount: 550,
     date: "1 day ago",
@@ -379,7 +379,7 @@ export const all_transactions = [
   },
   {
     name: "Sakura",
-    id: 485920,
+    id: 485927,
     type: "received",
     amount: 900,
     date: "4 days ago",
@@ -406,7 +406,7 @@ export const all_transactions = [
   },
   {
     name: "Kankuro",
-    id: 738291,
+    id: 738294,
     type: "withdrawal",
     amount: 260,
     date: "5 days ago",

@@ -90,7 +90,6 @@ const UserDashboard = () => {
             <small>Total Balance</small>
             <div className="py-2 border-b-2 border-primary_fade flex align-center justify-between">
               <span className="h3 text-xl text-primary">$29393</span>
-              <span>hello</span>
             </div>
             <div className="grid grid-cols-2 mt-2">
               <small>Currency</small>
@@ -115,7 +114,7 @@ const UserDashboard = () => {
           <div className="flex flex-wrap align-center space-x-2 my-3">
             {quick_transfers.map((person) => (
               <Image
-                key={Math.random() * 20}
+                key={person.id}
                 src={person.image}
                 alt="person image"
                 className="w-10 h-10 rounded-full cursor-pointer"
@@ -125,8 +124,9 @@ const UserDashboard = () => {
           </div>
 
           <div className="mb-3">
-            <label for="card_number">Card Number</label> <br />
+            <label htmlFor="card_number">Card Number</label> <br />
             <input
+              id="card_number"
               type="text"
               name="card_number"
               placeholder="284 895 8695 9599"

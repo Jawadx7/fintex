@@ -16,7 +16,7 @@ const Input = ({ type, id, name, label, value, setValue }) => {
         name={name}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="w-full my-2 outline-none border-2 borer-black rounded-md p-2 text-primary text-base"
+        className="w-full my-2 outline-none border-2 border-black rounded-md p-2 text-primary text-base"
       />
     </div>
   );

@@ -6,8 +6,7 @@ const EmailVerification = () => {
   const router = useRouter();
   const handleEmailCheck = (e) => {
     e.preventDefault();
-    console.log("User Authentication Attempted");
-    router.push("/dashboard");
+    router.push("/application/dashboard");
   };
 
   return (

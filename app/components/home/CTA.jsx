@@ -15,7 +15,7 @@ const CTA = () => {
         take the first step towards smarter financial management.
       </p>
 
-      <Link href="/auth">
+      <Link href="/auth/signup">
         <Button
           variant="contained"
           className="btn_primary rounded-[2rem] bg-white text-primary hover:text-primary hover:bg-white"
