@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -9,14 +8,14 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 
-import { transactions } from "../../../public/data/transactions";
+import type { TransactionRow } from "@/lib/finance";
 
-const TransactionsSection = () => {
+const TransactionsSection = ({ rows }: { rows: TransactionRow[] }) => {
   return (
     <div className="mb-3">
       <h1>Recent Transactions</h1>
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <Table sx={{ minWidth: 650 }} aria-label="Recent transactions">
           <TableHead>
             <TableRow>
               <TableCell>Client</TableCell>
@@ -29,7 +28,7 @@ const TransactionsSection = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {transactions.map((row) => (
+            {rows.map((row) => (
               <TableRow
                 key={row.id}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -37,7 +36,7 @@ const TransactionsSection = () => {
                 <TableCell component="th" scope="row">
                   {row.name}
                 </TableCell>
-                <TableCell align="center">{row.id}</TableCell>
+                <TableCell align="center">{row.reference}</TableCell>
                 <TableCell align="center">{row.type}</TableCell>
                 <TableCell align="center">{row.amount}</TableCell>
                 <TableCell align="center">{row.date}</TableCell>

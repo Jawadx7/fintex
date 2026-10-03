@@ -1,0 +1,86 @@
+// Prisma 7 generates TypeScript sources into ./generated/prisma.
+// This directory is gitignored; run `npm run db:generate` after cloning.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Auth.js v5 uses JWT sessions, so no Session/VerificationToken tables are
+// needed. "Account" here is a user's bank account, not an OAuth account.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  address      String?
+  country      String?
+  postalCode   String?
+  birthDate    DateTime?
+  idNumber     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  accounts     Account[]
+  transactions Transaction[]
+}
+
+model Account {
+  id        String        @id @default(cuid())
+  userId    String
+  name      String
+  type      AccountType
+  currency  String        @default("USD")
+  balance   Decimal       @db.Decimal(12, 2)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId])
+}
+
+model Transaction {
+  id         String            @id @default(cuid())
+  reference  String            @unique
+  userId     String
+  accountId  String
+  name       String
+  type       TransactionType
+  amount     Decimal           @db.Decimal(12, 2)
+  status     TransactionStatus @default(SUCCESS)
+  charges    Decimal           @default(0) @db.Decimal(12, 2)
+  occurredAt DateTime          @default(now())
+  createdAt  DateTime          @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([accountId])
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  INVESTMENT
+}
+
+enum TransactionType {
+  SEND
+  RECEIVE
+  WITHDRAWAL
+  DEPOSIT
+}
+
+enum TransactionStatus {
+  SUCCESS
+  PENDING
+  FAILED
+}

@@ -12,13 +12,29 @@ import Investments from "../../pages/Investments/Investments";
 import DataVisualization from "../../pages/Data_Visualization/DataVisualization";
 import Advisor from "../../pages/Advisor/Advisor";
 
-const ApplicationShell = ({ appPage }) => {
+import type { AccountSummary, FinanceSummary, TransactionRow } from "@/lib/finance";
+
+type ApplicationShellProps = {
+  appPage: string;
+  accounts: AccountSummary[];
+  transactions: TransactionRow[];
+  summary: FinanceSummary;
+  userName?: string | null;
+};
+
+const ApplicationShell = ({
+  appPage,
+  accounts,
+  transactions,
+  summary,
+  userName,
+}: ApplicationShellProps) => {
   const [sidebarStatus, setSidebarStatus] = useState("closed");
   const activePage = appPage.toLowerCase();
 
   return (
     <>
-      <DashboardNavbar setSidebarStatus={setSidebarStatus} />
+      <DashboardNavbar setSidebarStatus={setSidebarStatus} userName={userName} />
       <div className="flex">
         <Sidebar
           activeTab={appPage}
@@ -27,9 +43,13 @@ const ApplicationShell = ({ appPage }) => {
         />
         <main className="h-[100vh] overflow-auto md:overflow-hidden flex-[5] px-2 pt-20">
           {activePage === "dashboard" ? (
-            <UserDashboard />
+            <UserDashboard
+              accounts={accounts}
+              summary={summary}
+              transactions={transactions}
+            />
           ) : activePage === "transactions" ? (
-            <Transactions />
+            <Transactions summary={summary} rows={transactions} />
           ) : activePage === "payment_transfers" ? (
             <PaymentsAndTransfers />
           ) : activePage === "budgets" ? (

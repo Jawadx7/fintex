@@ -17,30 +17,41 @@ import { quick_transfers } from "../../../public/data/dashboard_dummy_data";
 import Card from "../../components/Card";
 import TransactionsSection from "./TransactionsSection";
 
-const UserDashboard = () => {
+const currency = (value) =>
+  value.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
+
+const UserDashboard = ({ accounts, summary, transactions }) => {
   const account = [
     {
-      id: 1,
+      id: "balance",
       name: "Balance",
-      amount: 2190,
+      amount: summary.totalBalance,
       icon: <Wallet size={30} color="white" />,
     },
     {
-      id: 2,
+      id: "income",
       name: "Income",
-      amount: 2900,
+      amount: summary.income,
       icon: <HandCoins size={30} color="white" />,
     },
     {
-      id: 3,
+      id: "savings",
       name: "Savings",
-      amount: 500,
+      // slice/reduce rather than accounts[0] + accounts[1]: a user with fewer
+      // than two accounts would otherwise throw on accounts[1].balance.
+      amount: accounts
+        .slice(0, 2)
+        .reduce((total, accountItem) => total + accountItem.balance, 0),
       icon: <PiggyBank size={30} color="white" />,
     },
     {
-      id: 4,
+      id: "expense",
       name: "Expense",
-      amount: 210,
+      amount: summary.outcome,
       icon: <Coins size={30} color="white" />,
     },
   ];
@@ -60,7 +71,7 @@ const UserDashboard = () => {
 
               <p className="my-3">{accountItem.name}</p>
 
-              <h1 className="h3 text-[2rem]">${accountItem.amount}</h1>
+              <h1 className="h3 text-[2rem]">{currency(accountItem.amount)}</h1>
             </div>
           ))}
         </div>
@@ -68,7 +79,7 @@ const UserDashboard = () => {
         {/* Analytics and Budget */}
         <AnalyticsandExpenciesSection />
 
-        <TransactionsSection />
+        <TransactionsSection rows={transactions} />
       </div>
 
       {/* right - other tools for account and transfers */}
@@ -89,7 +100,7 @@ const UserDashboard = () => {
           <div className="my-3 bg-primary_light p-2 rounded-md text-white">
             <small>Total Balance</small>
             <div className="py-2 border-b-2 border-primary_fade flex align-center justify-between">
-              <span className="h3 text-xl text-primary">$29393</span>
+              <span className="h3 text-xl text-primary">{currency(summary.totalBalance)}</span>
             </div>
             <div className="grid grid-cols-2 mt-2">
               <small>Currency</small>

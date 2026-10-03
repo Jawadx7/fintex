@@ -1,6 +1,5 @@
 "use client";
 import { useState, useMemo } from "react";
-import PropTypes from "prop-types";
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
@@ -20,11 +19,29 @@ import Tooltip from "@mui/material/Tooltip";
 import { Delete } from "lucide-react";
 import { Filter } from "lucide-react";
 import { visuallyHidden } from "@mui/utils";
-import { all_transactions } from "../../../public/data/allTransactions";
 
-const rows = all_transactions;
+import type { TransactionRow } from "@/lib/finance";
 
-function descendingComparator(a, b, orderBy) {
+type TransactionsTableProps = {
+  rows: TransactionRow[];
+};
+
+type SortableKey =
+  | "name"
+  | "reference"
+  | "type"
+  | "amount"
+  | "date"
+  | "status"
+  | "charges";
+
+type Comparator = (a: TransactionRow, b: TransactionRow) => number;
+
+function descendingComparator(
+  a: TransactionRow,
+  b: TransactionRow,
+  orderBy: SortableKey
+) {
   if (b[orderBy] < a[orderBy]) {
     return -1;
   }
@@ -34,14 +51,14 @@ function descendingComparator(a, b, orderBy) {
   return 0;
 }
 
-function getComparator(order, orderBy) {
+function getComparator(order: "asc" | "desc", orderBy: SortableKey): Comparator {
   return order === "desc"
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-function stableSort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
+function stableSort(array: TransactionRow[], comparator: Comparator) {
+  const stabilizedThis = array.map((el, index) => [el, index] as const);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
     if (order !== 0) {
@@ -52,7 +69,12 @@ function stableSort(array, comparator) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-const headCells = [
+const headCells: Array<{
+  id: SortableKey;
+  numeric: boolean;
+  disablePadding: boolean;
+  label: string;
+}> = [
   {
     id: "name",
     numeric: false,
@@ -60,7 +82,7 @@ const headCells = [
     label: "Client",
   },
   {
-    id: "id",
+    id: "reference",
     numeric: true,
     disablePadding: true,
     label: "ID",
@@ -97,18 +119,31 @@ const headCells = [
   },
 ];
 
-function EnhancedTableHead(props) {
-  const {
-    onSelectAllClick,
-    order,
-    orderBy,
-    numSelected,
-    rowCount,
-    onRequestSort,
-  } = props;
-  const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
-  };
+type HeadProps = {
+  onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  order: "asc" | "desc";
+  orderBy: SortableKey;
+  numSelected: number;
+  rowCount: number;
+  onRequestSort: (
+    event: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLTableCellElement>,
+    property: SortableKey
+  ) => void;
+};
+
+function EnhancedTableHead({
+  onSelectAllClick,
+  order,
+  orderBy,
+  numSelected,
+  rowCount,
+  onRequestSort,
+}: HeadProps) {
+  const createSortHandler =
+    (property: SortableKey) =>
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      onRequestSort(event, property);
+    };
 
   return (
     <TableHead className="h-auto md:h-70vh">
@@ -150,17 +185,7 @@ function EnhancedTableHead(props) {
   );
 }
 
-EnhancedTableHead.propTypes = {
-  numSelected: PropTypes.number.isRequired,
-  onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
-  order: PropTypes.oneOf(["asc", "desc"]).isRequired,
-  orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired,
-};
-
-function EnhancedTableToolbar(props) {
-  const { numSelected } = props;
+function EnhancedTableToolbar({ numSelected }: { numSelected: number }) {
 
   return (
     <Toolbar
@@ -213,36 +238,36 @@ function EnhancedTableToolbar(props) {
   );
 }
 
-EnhancedTableToolbar.propTypes = {
-  numSelected: PropTypes.number.isRequired,
-};
-
-export default function EnhancedTable() {
-  const [order, setOrder] = useState("asc");
-  const [orderBy, setOrderBy] = useState("id");
-  const [selected, setSelected] = useState([]);
+export default function TransactionsTable({ rows }: TransactionsTableProps) {
+  const [order, setOrder] = useState<"asc" | "desc">("asc");
+  const [orderBy, setOrderBy] = useState<SortableKey>("reference");
+  const [selected, setSelected] = useState<string[]>([]);
   const [page, setPage] = useState(0);
-  const [dense, setDense] = useState(false);
+  const [dense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const handleRequestSort = (event, property) => {
+  const handleRequestSort = (
+    _event: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLTableCellElement>,
+    property: SortableKey
+  ) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
 
-  const handleSelectAllClick = (event) => {
+  const handleSelectAllClick = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.id);
-      setSelected(newSelected);
+      setSelected(rows.map((n) => n.id));
       return;
     }
     setSelected([]);
   };
 
-  const handleClick = (event, id) => {
+  const handleClick = (event: React.MouseEvent<HTMLTableRowElement>, id: string) => {
     const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
+    let newSelected: string[] = [];
 
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, id);
@@ -259,16 +284,17 @@ export default function EnhancedTable() {
     setSelected(newSelected);
   };
 
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     setPage(newPage);
+    void event;
   };
 
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
-  const isSelected = (id) => selected.indexOf(id) !== -1;
+  const isSelected = (id: string) => selected.indexOf(id) !== -1;
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
@@ -280,7 +306,7 @@ export default function EnhancedTable() {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [order, orderBy, page, rowsPerPage]
+    [order, orderBy, page, rowsPerPage, rows]
   );
 
   return (
@@ -334,7 +360,7 @@ export default function EnhancedTable() {
                     >
                       {row.name}
                     </TableCell>
-                    <TableCell align="right">{row.id}</TableCell>
+                    <TableCell align="right">{row.reference}</TableCell>
                     <TableCell align="right">{row.type}</TableCell>
                     <TableCell align="right">{row.amount}</TableCell>
                     <TableCell align="right">{row.date}</TableCell>
