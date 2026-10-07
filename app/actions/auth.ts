@@ -3,11 +3,12 @@
 import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
 
-import { BCRYPT_ROUNDS, signIn, signOut } from "@/auth";
+import { BCRYPT_ROUNDS, auth, signIn, signOut } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import {
   loginSchema,
-  signupSchema,
+  profileSchema,
+  signupStep1Schema,
   toFieldErrors,
   type FieldErrors,
 } from "@/lib/validation";
@@ -23,18 +24,15 @@ function text(formData: FormData, key: string): string {
   return typeof value === "string" ? value : "";
 }
 
+// Signup step 1: creates the account and signs the user in. The profile
+// columns left untouched here are all nullable on the User model.
 export async function registerUser(
   _prevState: AuthActionState,
   formData: FormData
 ): Promise<AuthActionState> {
-  const parsed = signupSchema.safeParse({
+  const parsed = signupStep1Schema.safeParse({
     firstName: text(formData, "firstName"),
     lastName: text(formData, "lastName"),
-    address: text(formData, "address"),
-    country: text(formData, "country"),
-    postalCode: text(formData, "postalCode"),
-    birthDate: text(formData, "birthDate"),
-    idNumber: text(formData, "idNumber"),
     email: text(formData, "email"),
     password: text(formData, "password"),
     confirmPassword: text(formData, "confirmPassword"),
@@ -44,8 +42,7 @@ export async function registerUser(
     return { fieldErrors: toFieldErrors(parsed.error) };
   }
 
-  const { confirmPassword, birthDate, email, password, ...profile } =
-    parsed.data;
+  const { confirmPassword, email, password, ...identity } = parsed.data;
 
   if (confirmPassword !== password) {
     return { fieldErrors: { confirmPassword: "Passwords do not match" } };
@@ -68,10 +65,9 @@ export async function registerUser(
 
   await prisma.user.create({
     data: {
-      ...profile,
+      ...identity,
       email: normalizedEmail,
       passwordHash,
-      birthDate: new Date(birthDate),
     },
   });
 
@@ -87,6 +83,42 @@ export async function registerUser(
     }
     throw error;
   }
+
+  return { success: true };
+}
+
+// Signup step 2: attaches the remaining profile details to the account that
+// step 1 already created, so it runs against the session rather than
+// re-creating the user.
+export async function updateProfile(
+  _prevState: AuthActionState,
+  formData: FormData
+): Promise<AuthActionState> {
+  const session = await auth();
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    return { formError: "Your session expired. Please log in again." };
+  }
+
+  const parsed = profileSchema.safeParse({
+    address: text(formData, "address"),
+    country: text(formData, "country"),
+    postalCode: text(formData, "postalCode"),
+    birthDate: text(formData, "birthDate"),
+    idNumber: text(formData, "idNumber"),
+  });
+
+  if (!parsed.success) {
+    return { fieldErrors: toFieldErrors(parsed.error) };
+  }
+
+  const { birthDate, ...profile } = parsed.data;
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { ...profile, birthDate: new Date(birthDate) },
+  });
 
   return { success: true };
 }

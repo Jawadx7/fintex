@@ -1,9 +1,10 @@
-import { Button } from "@mui/material";
 import Link from "next/link";
+
+import { Button } from "@/app/components/ui/button";
 
 const CTA = () => {
   return (
-    <div className="bg-primary text-white px-5 py-20 rounded-[1.5rem] m-2 flex align-center justify-center flex-col">
+    <div className="mx-[5%] bg-primary text-white px-[5%] py-20 rounded-[1.5rem] my-8 flex align-center justify-center flex-col">
       <h1 className="text-center text-5xl font-[500]">Open an account in</h1>
       <h1 className="text-center text-5xl font-[500] text-primary_light">
         5 Minutes
@@ -17,8 +18,8 @@ const CTA = () => {
 
       <Link href="/auth/signup">
         <Button
-          variant="contained"
-          className="btn_primary rounded-[2rem] bg-white text-primary hover:text-primary hover:bg-white"
+          variant="outline"
+          className="btn_primary rounded-[2rem] border-white bg-white text-primary hover:bg-white hover:text-primary"
         >
           Get Started
         </Button>

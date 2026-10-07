@@ -1,24 +1,24 @@
 "use client";
 import { useState, useMemo } from "react";
-import { alpha } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
-import Checkbox from "@mui/material/Checkbox";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import { Delete } from "lucide-react";
-import { Filter } from "lucide-react";
-import { visuallyHidden } from "@mui/utils";
+import { ArrowDown, ArrowUp, ArrowUpDown, Delete, Filter } from "lucide-react";
+
+import { Button } from "@/app/components/ui/button";
+import { Checkbox } from "@/app/components/ui/checkbox";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/app/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/app/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 import type { TransactionRow } from "@/lib/finance";
 
@@ -72,169 +72,89 @@ function stableSort(array: TransactionRow[], comparator: Comparator) {
 const headCells: Array<{
   id: SortableKey;
   numeric: boolean;
-  disablePadding: boolean;
   label: string;
 }> = [
-  {
-    id: "name",
-    numeric: false,
-    disablePadding: true,
-    label: "Client",
-  },
-  {
-    id: "reference",
-    numeric: true,
-    disablePadding: true,
-    label: "ID",
-  },
-  {
-    id: "type",
-    numeric: true,
-    disablePadding: false,
-    label: "Type",
-  },
-  {
-    id: "amount",
-    numeric: true,
-    disablePadding: false,
-    label: "Amount",
-  },
-  {
-    id: "date",
-    numeric: true,
-    disablePadding: false,
-    label: "Date",
-  },
-  {
-    id: "status",
-    numeric: true,
-    disablePadding: false,
-    label: "Status",
-  },
-  {
-    id: "charges",
-    numeric: true,
-    disablePadding: false,
-    label: "Chages",
-  },
+  { id: "name", numeric: false, label: "Client" },
+  { id: "reference", numeric: true, label: "ID" },
+  { id: "type", numeric: true, label: "Type" },
+  { id: "amount", numeric: true, label: "Amount" },
+  { id: "date", numeric: true, label: "Date" },
+  { id: "status", numeric: true, label: "Status" },
+  { id: "charges", numeric: true, label: "Charges" },
 ];
 
-type HeadProps = {
-  onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  order: "asc" | "desc";
-  orderBy: SortableKey;
-  numSelected: number;
-  rowCount: number;
-  onRequestSort: (
-    event: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLTableCellElement>,
-    property: SortableKey
-  ) => void;
-};
-
-function EnhancedTableHead({
-  onSelectAllClick,
-  order,
-  orderBy,
-  numSelected,
-  rowCount,
-  onRequestSort,
-}: HeadProps) {
-  const createSortHandler =
-    (property: SortableKey) =>
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      onRequestSort(event, property);
-    };
+function SortButton({
+  active,
+  direction,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  direction: "asc" | "desc";
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  const Icon = !active ? ArrowUpDown : direction === "asc" ? ArrowUp : ArrowDown;
 
   return (
-    <TableHead className="h-auto md:h-70vh">
-      <TableRow>
-        <TableCell padding="checkbox">
-          <Checkbox
-            color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{
-              "aria-label": "select all desserts",
-            }}
-          />
-        </TableCell>
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align={headCell.numeric ? "right" : "left"}
-            padding={headCell.disablePadding ? "none" : "normal"}
-            sortDirection={orderBy === headCell.id ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : "asc"}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </Box>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={onClick}
+      className="-ml-3 h-8 gap-1 px-2 hover:bg-muted"
+    >
+      {children}
+      <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+      {/* Replaces MUI's visuallyHidden helper */}
+      <span className="sr-only">
+        {active
+          ? direction === "desc"
+            ? "sorted descending"
+            : "sorted ascending"
+          : "not sorted"}
+      </span>
+    </Button>
   );
 }
 
-function EnhancedTableToolbar({ numSelected }: { numSelected: number }) {
-
+function TransactionsToolbar({ numSelected }: { numSelected: number }) {
   return (
-    <Toolbar
-      sx={{
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-        ...(numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(
-              theme.palette.primary.main,
-              theme.palette.action.activatedOpacity
-            ),
-        }),
-      }}
+    <div
+      className={cn(
+        "flex h-12 items-center justify-between gap-4 px-4",
+        numSelected > 0 && "bg-primary/10"
+      )}
     >
       {numSelected > 0 ? (
-        <Typography
-          sx={{ flex: "1 1 100%" }}
-          color="inherit"
-          variant="subtitle1"
-          component="div"
-        >
-          {numSelected} selected
-        </Typography>
+        <p className="text-sm font-medium">{numSelected} selected</p>
       ) : (
-        <Typography
-          sx={{ flex: "1 1 100%" }}
-          variant="h6"
-          id="tableTitle"
-          component="div"
-        >
+        <h6 id="tableTitle" className="text-base font-semibold">
           Transactions
-        </Typography>
+        </h6>
       )}
 
-      {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton>
-            <Delete />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <Filter />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Toolbar>
+      <TooltipProvider delayDuration={200}>
+        {numSelected > 0 ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Delete selected">
+                <Delete className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Delete</TooltipContent>
+          </Tooltip>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Filter list">
+                <Filter className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Filter list</TooltipContent>
+          </Tooltip>
+        )}
+      </TooltipProvider>
+    </div>
   );
 }
 
@@ -243,166 +163,171 @@ export default function TransactionsTable({ rows }: TransactionsTableProps) {
   const [orderBy, setOrderBy] = useState<SortableKey>("reference");
   const [selected, setSelected] = useState<string[]>([]);
   const [page, setPage] = useState(0);
-  const [dense] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const rowsPerPage = 5;
 
-  const handleRequestSort = (
-    _event: React.MouseEvent<HTMLButtonElement> | React.MouseEvent<HTMLTableCellElement>,
-    property: SortableKey
-  ) => {
+  const handleRequestSort = (property: SortableKey) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
 
-  const handleSelectAllClick = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (event.target.checked) {
-      setSelected(rows.map((n) => n.id));
-      return;
-    }
-    setSelected([]);
+  const handleSelectAllClick = (checked: boolean) => {
+    setSelected(checked ? rows.map((n) => n.id) : []);
   };
 
-  const handleClick = (event: React.MouseEvent<HTMLTableRowElement>, id: string) => {
-    const selectedIndex = selected.indexOf(id);
-    let newSelected: string[] = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
-      );
-    }
-    setSelected(newSelected);
+  const handleClick = (_event: React.MouseEvent<HTMLTableRowElement>, id: string) => {
+    setSelected((current) =>
+      current.includes(id)
+        ? current.filter((selectedId) => selectedId !== id)
+        : current.concat(id)
+    );
   };
 
-  const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
-    setPage(newPage);
-    void event;
-  };
+  const isSelected = (id: string) => selected.includes(id);
+  const allSelected = rows.length > 0 && selected.length === rows.length;
+  const someSelected = selected.length > 0 && !allSelected;
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const isSelected = (id: string) => selected.indexOf(id) !== -1;
-
-  // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
-  const visibleRows = useMemo(
-    () =>
-      stableSort(rows, getComparator(order, orderBy)).slice(
-        page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage
-      ),
-    [order, orderBy, page, rowsPerPage, rows]
+  const sortedRows = useMemo(
+    () => stableSort(rows, getComparator(order, orderBy)),
+    [order, orderBy, rows]
   );
 
-  return (
-    <Box sx={{ width: "100%" }}>
-      <Paper sx={{ width: "100%", mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
-        <TableContainer>
-          <Table
-            sx={{ minWidth: 750 }}
-            aria-labelledby="tableTitle"
-            size={dense ? "small" : "medium"}
-          >
-            <EnhancedTableHead
-              numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
-              onRequestSort={handleRequestSort}
-              rowCount={rows.length}
-            />
-            <TableBody>
-              {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.id);
-                const labelId = `enhanced-table-checkbox-${index}`;
+  const pageCount = Math.max(1, Math.ceil(sortedRows.length / rowsPerPage));
+  // Clamp so deleting/resizing can never leave the pager on a dead page.
+  const safePage = Math.min(page, pageCount - 1);
+  const visibleRows = sortedRows.slice(
+    safePage * rowsPerPage,
+    safePage * rowsPerPage + rowsPerPage
+  );
+  const firstRowIndex = sortedRows.length === 0 ? 0 : safePage * rowsPerPage + 1;
+  const lastRowIndex = Math.min((safePage + 1) * rowsPerPage, sortedRows.length);
 
+  return (
+    <div className="w-full">
+      <div className="mb-2 w-full rounded-md border bg-card shadow-sm">
+        <TransactionsToolbar numSelected={selected.length} />
+        <Table aria-labelledby="tableTitle">
+          <TableHeader className="h-auto md:h-auto">
+            <TableRow>
+              <TableHead className="w-12">
+                <Checkbox
+                  checked={
+                    allSelected ? true : someSelected ? "indeterminate" : false
+                  }
+                  onCheckedChange={(checked) =>
+                    handleSelectAllClick(checked === true)
+                  }
+                  aria-label="Select all transactions"
+                />
+              </TableHead>
+              {headCells.map((headCell) => {
+                const active = orderBy === headCell.id;
                 return (
-                  <TableRow
-                    hover
-                    onClick={(event) => handleClick(event, row.id)}
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row.id}
-                    selected={isItemSelected}
-                    sx={{ cursor: "pointer" }}
+                  <TableHead
+                    key={headCell.id}
+                    className={headCell.numeric ? "text-right" : undefined}
                   >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        color="primary"
-                        checked={isItemSelected}
-                        inputProps={{
-                          "aria-labelledby": labelId,
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      padding="none"
+                    <SortButton
+                      active={active}
+                      direction={active ? order : "asc"}
+                      onClick={() => handleRequestSort(headCell.id)}
                     >
-                      {row.name}
-                    </TableCell>
-                    <TableCell align="right">{row.reference}</TableCell>
-                    <TableCell align="right">{row.type}</TableCell>
-                    <TableCell align="right">{row.amount}</TableCell>
-                    <TableCell align="right">{row.date}</TableCell>
-                    <TableCell align="right">
-                      <small
-                        className={`p-2 rounded-md ${
-                          row.status === "success"
-                            ? "text-white bg-primary_fade"
-                            : row.status === "pending"
-                              ? "bg-gold_fade text-primary"
-                              : "text-red-500"
-                        }`}
-                      >
-                        {row.status}
-                      </small>
-                    </TableCell>
-                    <TableCell align="right">{row.charges}</TableCell>
-                  </TableRow>
+                      {headCell.label}
+                    </SortButton>
+                  </TableHead>
                 );
               })}
-              {emptyRows > 0 && (
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {visibleRows.map((row, index) => {
+              const isItemSelected = isSelected(row.id);
+              const labelId = `enhanced-table-checkbox-${index}`;
+
+              return (
                 <TableRow
-                  style={{
-                    height: (dense ? 33 : 53) * emptyRows,
-                  }}
+                  key={row.id}
+                  data-state={isItemSelected ? "selected" : undefined}
+                  onClick={(event) => handleClick(event, row.id)}
+                  role="checkbox"
+                  aria-checked={isItemSelected}
+                  tabIndex={-1}
+                  className="cursor-pointer hover:bg-muted/50 data-[state=selected]:bg-muted"
                 >
-                  <TableCell colSpan={6} />
+                  <TableCell className="w-12">
+                    <Checkbox
+                      checked={isItemSelected}
+                      onCheckedChange={() => handleClick(
+                        { stopPropagation: () => {} } as React.MouseEvent<HTMLTableRowElement>,
+                        row.id
+                      )}
+                      aria-labelledby={labelId}
+                    />
+                  </TableCell>
+                  <TableCell id={labelId} className="font-medium">
+                    {row.name}
+                  </TableCell>
+                  <TableCell className="text-right">{row.reference}</TableCell>
+                  <TableCell className="text-right">{row.type}</TableCell>
+                  <TableCell className="text-right">{row.amount}</TableCell>
+                  <TableCell className="text-right">{row.date}</TableCell>
+                  <TableCell className="text-right">
+                    <small
+                      className={cn(
+                        "rounded-md p-2",
+                        row.status === "success" && "bg-primary_fade text-white",
+                        row.status === "pending" && "bg-gold_fade text-primary",
+                        row.status === "failed" && "text-red-500"
+                      )}
+                    >
+                      {row.status}
+                    </small>
+                  </TableCell>
+                  <TableCell className="text-right">{row.charges}</TableCell>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
-    </Box>
+              );
+            })}
+
+            {sortedRows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={8} className="h-24 text-center">
+                  No transactions yet.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+
+        <div className="flex items-center justify-between px-4 py-3">
+          <p className="text-sm text-muted-foreground">
+            {sortedRows.length === 0
+              ? "0 of 0"
+              : `${firstRowIndex}-${lastRowIndex} of ${sortedRows.length}`}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={safePage === 0}
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {safePage + 1} of {pageCount}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={safePage >= pageCount - 1}
+              onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -47,6 +47,31 @@ const typeInto = async (page, name, value) => {
   await page.type(sel, value);
 };
 
+// Signup is a two-step form: step 1 creates the account, step 2 collects the
+// profile. `address` only exists on step 2, so its appearance is the signal
+// that step 1 was accepted.
+const fillSignupStep1 = async (page, fields) => {
+  for (const [k, v] of Object.entries(fields)) await typeInto(page, k, v);
+  await page.click('button[type="submit"]');
+  await page.waitForSelector('input[name="address"]', {
+    timeout: 45000,
+    polling: 300,
+  });
+};
+
+const fillSignupStep2 = async (page, fields) => {
+  for (const [k, v] of Object.entries(fields)) await typeInto(page, k, v);
+  // type="date" segment order is locale-dependent, so set it natively.
+  await setNativeValue(page, 'input[name="birthDate"]', fields.birthDate);
+  await page.click('button[type="submit"]');
+};
+
+const fillSignup = async (page, step1, step2) => {
+  await page.goto(`${BASE}/auth/signup`, { waitUntil: "networkidle2" });
+  await fillSignupStep1(page, step1);
+  await fillSignupStep2(page, step2);
+};
+
 const setNativeValue = (page, sel, value) =>
   page.$eval(
     sel,
@@ -126,27 +151,22 @@ try {
   check("invalid signup stays on the form", new URL(p1.url()).pathname === "/auth/signup");
   check("invalid signup issues no session",
     !(await p1.cookies()).some((c) => c.name === "authjs.session-token" && c.value));
+  check("invalid step 1 does not advance to step 2",
+    !(await p1.$('input[name="address"]')));
 
   // ---------- 3. real signup ----------
-  console.log("\n=== C. REAL SIGNUP ===");
-  await p1.goto(`${BASE}/auth/signup`, { waitUntil: "networkidle2" });
-  for (const [k, v] of Object.entries({
-    firstName: "Rin",
-    lastName: "Sato",
-    address: "12 Otemachi",
-    country: "Japan",
-    postalCode: "100-0001",
-    idNumber: "ID-9911-2233",
-    email,
-    password,
-    confirmPassword: password,
-  })) {
-    await typeInto(p1, k, v);
-  }
-  // type="date" segment order is locale-dependent, so set it natively.
-  await setNativeValue(p1, 'input[name="birthDate"]', "1993-05-14");
-
-  await p1.click('button[type="submit"]');
+  console.log("\n=== C. REAL SIGNUP (TWO-STEP) ===");
+  await fillSignup(
+    p1,
+    { firstName: "Rin", lastName: "Sato", email, password, confirmPassword: password },
+    {
+      address: "12 Otemachi",
+      country: "Japan",
+      postalCode: "100-0001",
+      birthDate: "1993-05-14",
+      idNumber: "ID-9911-2233",
+    },
+  );
   await waitForPath(p1, /^\/application/);
   await waitForApp(p1);
   check("signup redirects into the dashboard", /^\/application/.test(new URL(p1.url()).pathname),
@@ -167,19 +187,20 @@ try {
   // successful signup above installed in the default context.
   const ctxShort = await browser.createBrowserContext();
   const pShort = await ctxShort.newPage();
+  // Step 1 only: a weak password must be rejected before any account exists.
   await pShort.goto(`${BASE}/auth/signup`, { waitUntil: "networkidle2" });
   for (const [k, v] of Object.entries({
-    firstName: "Ann", lastName: "Lee", address: "1 Main St", country: "Japan",
-    postalCode: "100-0001", idNumber: "ID-1", email: `short-${Date.now()}@fintex.app`,
+    firstName: "Ann", lastName: "Lee", email: `short-${Date.now()}@fintex.app`,
     password: "weak", confirmPassword: "weak",
   })) await pShort.type(`input[name="${k}"]`, v);
-  await setNativeValue(pShort, 'input[name="birthDate"]', "1990-01-01");
   await pShort.click('button[type="submit"]');
   await sleep(3000);
   const shortAlert = await pShort.$eval('[role="alert"]', (el) => el.textContent.trim()).catch(() => "");
   check("weak password rejected", /password/i.test(shortAlert), `alert="${shortAlert.slice(0, 60)}"`);
   check("weak password issues no session",
     !(await pShort.cookies()).some((c) => c.name === "authjs.session-token" && c.value));
+  check("weak password never reaches step 2",
+    !(await pShort.$('input[name="address"]')));
   await ctxShort.close();
 
   // ---------- 5. real login ----------
@@ -277,3 +298,4 @@ if (failed.length) {
   failed.forEach((f) => console.log("  - " + f.name));
   process.exit(1);
 }
+

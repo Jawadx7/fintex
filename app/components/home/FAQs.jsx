@@ -4,7 +4,7 @@ const FAQs = () => {
   return (
     <div
       id="faqs"
-      className="bg-transparent shadow-lg px-5 py-20 rounded-[1.5rem] m-2 my-10 flex-col"
+      className="w-full min-w-0 bg-transparent shadow-lg px-[5%] py-20 rounded-[1.5rem] m-0 my-10 flex-col"
     >
       <h1 className="text-5xl font-[500] text-center text-primary">FAQs</h1>
       <article className="w-full sm:w-1/2 mt-5">

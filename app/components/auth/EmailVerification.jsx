@@ -1,6 +1,7 @@
 "use client";
-import { Button } from "@mui/material";
 import { useRouter } from "next/navigation";
+
+import { Button } from "@/app/components/ui/button";
 
 const EmailVerification = () => {
   const router = useRouter();
@@ -15,8 +16,7 @@ const EmailVerification = () => {
       <form>
         <Button
           type="submit"
-          variant="contained"
-          className="btn_primary bg-primary text-white w-full"
+          className="btn_primary w-full bg-primary text-white hover:bg-primary/90"
           onClick={handleEmailCheck}
         >
           Submit

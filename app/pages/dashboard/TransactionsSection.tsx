@@ -1,12 +1,14 @@
 "use client";
 
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/app/components/ui/table";
+import { cn } from "@/lib/utils";
 
 import type { TransactionRow } from "@/lib/finance";
 
@@ -14,51 +16,53 @@ const TransactionsSection = ({ rows }: { rows: TransactionRow[] }) => {
   return (
     <div className="mb-3">
       <h1>Recent Transactions</h1>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="Recent transactions">
-          <TableHead>
+      <div className="relative w-full overflow-x-auto rounded-md border bg-card shadow-sm">
+        <Table aria-label="Recent transactions">
+          <TableHeader>
             <TableRow>
-              <TableCell>Client</TableCell>
-              <TableCell align="center">ID</TableCell>
-              <TableCell align="center">Type</TableCell>
-              <TableCell align="center">Amount($)</TableCell>
-              <TableCell align="center">Date</TableCell>
-              <TableCell align="center">Status</TableCell>
-              <TableCell align="center">Charges($)</TableCell>
+              <TableHead>Client</TableHead>
+              <TableHead className="text-center">ID</TableHead>
+              <TableHead className="text-center">Type</TableHead>
+              <TableHead className="text-center">Amount($)</TableHead>
+              <TableHead className="text-center">Date</TableHead>
+              <TableHead className="text-center">Status</TableHead>
+              <TableHead className="text-center">Charges($)</TableHead>
             </TableRow>
-          </TableHead>
+          </TableHeader>
           <TableBody>
             {rows.map((row) => (
-              <TableRow
-                key={row.id}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <TableCell component="th" scope="row">
-                  {row.name}
-                </TableCell>
-                <TableCell align="center">{row.reference}</TableCell>
-                <TableCell align="center">{row.type}</TableCell>
-                <TableCell align="center">{row.amount}</TableCell>
-                <TableCell align="center">{row.date}</TableCell>
-                <TableCell align="center">
+              <TableRow key={row.id}>
+                <TableCell className="font-medium">{row.name}</TableCell>
+                <TableCell className="text-center">{row.reference}</TableCell>
+                <TableCell className="text-center">{row.type}</TableCell>
+                <TableCell className="text-center">{row.amount}</TableCell>
+                <TableCell className="text-center">{row.date}</TableCell>
+                <TableCell className="text-center">
                   <small
-                    className={`p-2 rounded-md ${
-                      row.status === "success"
-                        ? "text-white bg-primary_fade"
-                        : row.status === "pending"
-                        ? "bg-gold_fade text-primary"
-                        : "text-red-500"
-                    }`}
+                    className={cn(
+                      "rounded-md p-2",
+                      row.status === "success" && "bg-primary_fade text-white",
+                      row.status === "pending" && "bg-gold_fade text-primary",
+                      row.status === "failed" && "text-red-500"
+                    )}
                   >
                     {row.status}
                   </small>
                 </TableCell>
-                <TableCell align="center">{row.charges}</TableCell>
+                <TableCell className="text-center">{row.charges}</TableCell>
               </TableRow>
             ))}
+
+            {rows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} className="h-24 text-center">
+                  No transactions yet.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
-      </TableContainer>
+      </div>
     </div>
   );
 };

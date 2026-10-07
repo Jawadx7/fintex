@@ -1,9 +1,19 @@
-import React from "react";
-import "../styles/dashboard.scss";
+import Image from "next/image";
 
-const Card = ({ bg, color, name, number, provider, date }) => {
+import banner from "../../public/images/banner.jpeg";
+
+const Card = ({ name, number, provider, date }) => {
   return (
-    <div className={`card text-white rounded-md p-3 my-2`}>
+    <div className="relative overflow-hidden rounded-md p-3 my-2 text-white">
+      {/* Replaces the .card background-image rule from dashboard.scss */}
+      <Image
+        src={banner}
+        alt=""
+        fill
+        sizes="(max-width: 768px) 100vw, 33vw"
+        className="object-cover object-center -z-10"
+        aria-hidden="true"
+      />
       <div className="flex align-center justify-between">
         <span>CODE</span>
         <span>{provider}</span>

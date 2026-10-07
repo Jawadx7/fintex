@@ -2,10 +2,11 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@mui/material";
 import Link from "next/link";
 
-import Input from "@/app/components/Input";
+import { Button } from "@/app/components/ui/button";
+import { Input } from "@/app/components/ui/input";
+import { Label } from "@/app/components/ui/label";
 import { authenticateUser, type AuthActionState } from "@/app/actions/auth";
 
 const initialState: AuthActionState = {};
@@ -34,55 +35,67 @@ const LoginForm = () => {
 
   return (
     <div>
-      <h1 className="h3 text-[2rem]">Welcome Back,</h1>
-      <small className="text-gray-500">Please enter your details ...</small>
+      <form className="grid gap-4" action={formAction} noValidate>
+        <div className="grid gap-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
+            placeholder="you@example.com"
+            aria-invalid={Boolean(fieldErrors.email)}
+            aria-describedby={fieldErrors.email ? "email-error" : undefined}
+            required
+          />
+          {fieldErrors.email && (
+            <p id="email-error" className="text-xs text-destructive">
+              {fieldErrors.email}
+            </p>
+          )}
+        </div>
 
-      <form className="mt-5" action={formAction} noValidate>
-        <Input
-          type="email"
-          id="email"
-          name="email"
-          label="Email"
-          value={email}
-          setValue={setEmail}
-          error={fieldErrors.email}
-          required
-          autoComplete="email"
-        />
-        <Input
-          type="password"
-          id="password"
-          name="password"
-          label="Password"
-          value={password}
-          setValue={setPassword}
-          error={fieldErrors.password}
-          required
-          autoComplete="current-password"
-        />
+        <div className="grid gap-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
+            aria-invalid={Boolean(fieldErrors.password)}
+            aria-describedby={
+              fieldErrors.password ? "password-error" : undefined
+            }
+            required
+          />
+          {fieldErrors.password && (
+            <p id="password-error" className="text-xs text-destructive">
+              {fieldErrors.password}
+            </p>
+          )}
+        </div>
 
         {state.formError && (
-          <p role="alert" className="text-[12px] text-red-500 mt-2">
+          <p role="alert" className="text-xs text-destructive">
             {state.formError}
           </p>
         )}
 
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={isPending}
-          className="hover:bg-primary mt-5 bg-primary text-white w-full"
-        >
-          {isPending ? "Logging in..." : "LogIn"}
+        <Button type="submit" disabled={isPending} className="mt-2 w-full">
+          {isPending ? "Logging in..." : "Log in"}
         </Button>
       </form>
 
-      <div className="place-middle mt-[2rem]">
-        <span>Don&apos;t have an account?</span>
-        <Link href="/auth/signup" className="text-primary">
-          Sign Up
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <Link href="/auth/signup" className="font-medium text-primary underline-offset-4 hover:underline">
+          Sign up
         </Link>
-      </div>
+      </p>
     </div>
   );
 };

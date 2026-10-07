@@ -1,11 +1,12 @@
 "use client";
 
 import TestimonyCard from "./TestimonyCard";
-
 import { testimonials } from "../../../public/data/testimonials";
 
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
+
+import { Reveal } from "../motion/Reveal";
 
 const Testimonial = () => {
   const responsive = {
@@ -29,28 +30,29 @@ const Testimonial = () => {
   return (
     <div
       id="testimonial"
-      className="flex-col lg:flex-row lg:flex align-center bg-primary text-white px-[5%] py-[5rem] my-[3rem]"
+      className="flex w-full min-w-0 flex-col lg:flex-row align-center bg-primary text-white px-[5%] py-[5rem] my-[3rem]"
     >
-      <div className="flex-[1] px-3">
-        {/* <h1 className="h3 text-xl md:text-4xl">Real Stories</h1> */}
+      <Reveal className="min-w-0 flex-[1] px-3">
         <h1 className="mb-5 text-4xl">Real Stories From Enterprenuers</h1>
         <p className="lg:text-base text-xl">
           Discover inspiring journeys from entrepreneurs who have transformed
           their dreams into reality. These stories showcase the impact of
           innovative financial solutions.
         </p>
+      </Reveal>
+      <div className="w-full min-w-0 flex-[3] overflow-hidden">
+        <Carousel
+          swipeable={true}
+          draggable={true}
+          showDots={false}
+          responsive={responsive}
+          className="mt-5 w-full min-w-0 lg:mt-0"
+        >
+          {testimonials.map((testimonyItem) => (
+            <TestimonyCard key={testimonyItem.id} testimonyItem={testimonyItem} />
+          ))}
+        </Carousel>
       </div>
-      <Carousel
-        swipeable={true}
-        draggable={true}
-        showDots={false}
-        responsive={responsive}
-        className="flex-[3] mt-5 lg:mt-0"
-      >
-        {testimonials.map((testimonyItem) => (
-          <TestimonyCard key={testimonyItem.id} testimonyItem={testimonyItem} />
-        ))}
-      </Carousel>
     </div>
   );
 };

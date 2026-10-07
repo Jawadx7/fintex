@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: clip;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    overflow-x: clip;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Landing-page section rhythm, from the old styles/globals.scss. */
+  section {
+    margin: 2rem 0;
+    padding: 5rem 5% 3rem;
+    position: relative;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  :root {
+    /* Fintex brand teal, kept as the shadcn --primary token so bg-primary,
+       text-primary and shadcn primitives all resolve to the same colour. */
+    --primary: 174 27% 22%;
+    --primary-foreground: 0 0% 100%;
+
+    --background: 0 0% 100%;
+    --foreground: 174 20% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 174 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 174 20% 12%;
+
+    --secondary: 150 9% 91%;
+    --secondary-foreground: 174 27% 22%;
+    --muted: 150 9% 91%;
+    --muted-foreground: 174 8% 42%;
+    --accent: 150 9% 91%;
+    --accent-foreground: 174 27% 22%;
+
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 150 9% 87%;
+    --input: 150 9% 87%;
+    --ring: 174 27% 22%;
+
+    --chart-1: 174 45% 32%;
+    --chart-2: 38 38% 62%;
+    --chart-3: 174 8% 58%;
+    --chart-4: 174 27% 22%;
+    --chart-5: 25 20% 40%;
+
+    --radius: 0.5rem;
+
+    --sidebar: 174 20% 98%;
+    --sidebar-foreground: 174 20% 12%;
+    --sidebar-primary: 174 27% 22%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 150 9% 91%;
+    --sidebar-accent-foreground: 174 27% 22%;
+    --sidebar-border: 150 9% 87%;
+    --sidebar-ring: 174 27% 22%;
+  }
+}
+
+@layer utilities {
+  /* Ported from the old styles/globals.scss. */
+
+  .h3 {
+    font-weight: 800;
+  }
+
+  .place-middle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .align-center {
+    align-items: center;
+  }
+
+  .transition-smooth {
+    transition: 0.4s ease;
+  }
+
+  .transition-smooth-slow {
+    transition: 0.6s ease;
+  }
+
+  .btn_primary {
+    padding: 1rem 1.5rem;
+  }
+  .btn_primary:hover {
+    background: hsl(var(--primary));
+  }
+
+  /* Diagonal brand-colour flag behind a label, from the old .tag rule. */
+  .tag {
+    position: relative;
+    width: fit-content;
+    color: hsl(var(--primary));
+  }
+  .tag::before {
+    content: "";
+    z-index: -1;
+    position: absolute;
+    width: 4rem;
+    height: 4rem;
+    left: -30%;
+    top: -30%;
+    background: linear-gradient(
+      45deg,
+      hsl(var(--primary)),
+      hsl(var(--primary)),
+      white
+    );
+    transform: rotate(45deg);
+  }
+
+  /* Thin green scrollbar, from the old .styled_srollbar / .dashboard rules.
+     `.styled_scrollbar` is the original class name used by Sidebar and
+     Payments_Transfers; both spellings resolve to the same rule. */
+  .styled_srollbar,
+  .styled_scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #16a34a rgb(174, 246, 174);
+  }
+  .styled_srollbar::-webkit-scrollbar,
+  .styled_scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+  .styled_srollbar::-webkit-scrollbar-track,
+  .styled_scrollbar::-webkit-scrollbar-track {
+    background: rgb(174, 246, 174);
+  }
+  .styled_srollbar::-webkit-scrollbar-thumb,
+  .styled_scrollbar::-webkit-scrollbar-thumb {
+    background: green;
+  }
+}

@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button, TextField } from "@mui/material";
 import { StarIcon } from "lucide-react";
+
+import { Button } from "@/app/components/ui/button";
+import { Input } from "@/app/components/ui/input";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -59,20 +61,17 @@ const Footer = () => {
         </div>
 
         <form>
-          <TextField
+          <Input
             type="email"
-            label="Enter your email"
-            variant="outlined"
-            fullWidth
+            aria-label="Enter your email"
+            placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className=""
+            className="w-full"
           />
-          <br />
           <Button
             type="submit"
-            variant="contained"
-            className="mt-3 hover:bg-primary rounded-l-0 text-white bg-primary"
+            className="mt-3 w-full rounded-l-0 bg-primary text-white hover:bg-primary/90"
           >
             Submit
           </Button>

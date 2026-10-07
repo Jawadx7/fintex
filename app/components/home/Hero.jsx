@@ -1,5 +1,7 @@
 "use client";
 
+import { motion, useReducedMotion } from "motion/react";
+
 import Img1 from "../../../public/images/figure-1.png";
 import PrimaryButton from "../PrimaryButton";
 // import { Globe, Star } from "lucide-react";
@@ -7,12 +9,27 @@ import Image from "next/image";
 import Link from "next/link";
 
 const Hero = () => {
+  const reduceMotion = useReducedMotion();
+  const textVariants = {
+    hidden: { opacity: 0, y: reduceMotion ? 0 : 28 },
+    shown: { opacity: 1, y: 0 },
+  };
   return (
     <div
       id="home"
-      className="bg-gray-100 w-full h-fit md:h-[55vh] lg:h-[100vh] grid grid-cols-1 md:grid-cols-2 align-center gap-2"
+      className="bg-gray-100 w-full min-w-0 h-fit md:h-[55vh] lg:h-[100vh] grid grid-cols-1 md:grid-cols-2 align-center gap-2 px-[5%]"
     >
-      <div className="h-full pt-[6rem] px-[5%] flex align-start justify-center flex-col">
+      <motion.div
+        className="h-full min-w-0 pt-[6rem] flex align-start justify-center flex-col"
+        initial="hidden"
+        animate="shown"
+        variants={textVariants}
+        transition={
+          reduceMotion
+            ? { duration: 0.2 }
+            : { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+        }
+      >
         <h1 className="text-[2rem] lg:text-[3.5rem] capitalize">
           Change the way you use your{" "}
           <span className="text-[#294744]">money</span>
@@ -32,10 +49,25 @@ const Hero = () => {
         <Link href="#footer">
           <PrimaryButton text="Contact US" />
         </Link>
-      </div>
-      <div className="flex align-center justify-center">
-        <Image src={Img1} alt="Image" width={800} />
-      </div>
+      </motion.div>
+      <motion.div
+        className="flex min-w-0 align-center justify-center"
+        initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={
+          reduceMotion
+            ? { duration: 0.2 }
+            : { duration: 0.8, delay: 0.08, ease: [0.22, 1, 0.36, 1] }
+        }
+      >
+        <Image
+          src={Img1}
+          alt="Image"
+          width={800}
+          className="h-auto w-full max-w-[800px]"
+          sizes="(min-width: 768px) 50vw, 100vw"
+        />
+      </motion.div>
       {/* <div className="bg-blue-600 h-[150vh] sm:h-[70vh] lg:h-full grid grid-cols-1 sm:grid-cols-2 lg:pt-[6rem]">
         <span className="bg-primary border-2 border-white"></span>
         <span className="bg-primary border-2 border-white"></span>

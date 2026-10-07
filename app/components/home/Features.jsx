@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { ArrowUpCircle } from "lucide-react";
 
+import { Reveal, Stagger, StaggerItem } from "../motion/Reveal";
+
 const Features = () => {
   const features = [
     {
@@ -39,25 +41,25 @@ const Features = () => {
   ];
   return (
     <section id="fitures">
-      <div className="ml-[10%] sm:ml-1">
+      <Reveal className="ml-[10%] sm:ml-1">
         <SectionTag text="Features" center={true} />
-      </div>
+      </Reveal>
       <div className="grid grid-cols-1 lg:grid-cols-2 align-center">
-        <h1 className="mt-[3rem] text-[2rem] sm:text-[3rem]">
+        <Reveal as="h1" className="mt-[3rem] text-[2rem] sm:text-[3rem]">
           Finally, a better way to simplify payments
-        </h1>
-        <p className="lg:text-xl sm:text-3xl text-gray-600">
+        </Reveal>
+        <Reveal direction="left" delay={0.12} className="lg:text-xl sm:text-3xl text-gray-600">
           We provide a seamless and efficient payment experience, designed to
           take the hassle out of managing your financial transactions. Our
           platform offers:
-        </p>
+        </Reveal>
       </div>
 
-      <div className="w-full md:mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mt-[2rem] gap-3">
+      <Stagger className="w-full md:mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mt-[2rem] gap-3">
         {features.map((featureItem) => (
-          <div
+          <StaggerItem
             key={featureItem.id}
-            className="rounded-[1rem] p-[1rem] shadow-md hover:bg-brown_light"
+            className="rounded-[1rem] p-[1rem] shadow-md transition-smooth hover:bg-brown_light"
           >
             <div className="mb-3">
               {/* <Badge size={60} /> */}
@@ -69,7 +71,7 @@ const Features = () => {
             <div>
               <CheckCircle size={40} />
             </div>
-          </div>
+          </StaggerItem>
         ))}
 
         {/* <div className="rounded-[1rem] p-[1rem] shadow-md hover:bg-brown_light">
@@ -102,7 +104,7 @@ const Features = () => {
             <CheckCircle size={40} />
           </div>
         </div> */}
-      </div>
+      </Stagger>
     </section>
   );
 };

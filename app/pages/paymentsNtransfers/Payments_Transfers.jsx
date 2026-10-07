@@ -2,7 +2,7 @@
 
 import PrimaryButton from "../../components/PrimaryButton";
 import Input from "../../components/Input";
-import { Button } from "@mui/material";
+import { Button } from "@/app/components/ui/button";
 import { useState } from "react";
 
 const InputComponent = ({
@@ -144,12 +144,12 @@ const PaymentsAndTransfers = () => {
         inputSetValue={setAmount}
       />
       <Button
-        variant="text"
-        type="submit"
-        className="text-white bg-primary my-3 w-full hover:bg-primary"
-      >
-        Transfer Funds
-      </Button>
+          type="submit"
+          variant="ghost"
+          className="my-3 w-full bg-primary text-white hover:bg-primary/90"
+        >
+          Transfer Funds
+        </Button>
     </form>
   );
 };

@@ -1,67 +1,81 @@
 "use client";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import { useState } from "react";
-import { PieChart } from "@mui/x-charts/PieChart";
-import Chart from "../../components/Chart";
 
-const data = [
-  { id: 0, value: 20, label: "Grocery" },
-  { id: 1, value: 15, label: "Medical Care" },
-  { id: 2, value: 10, label: "Shopping" },
-  { id: 3, value: 17, label: "Entertainment" },
+import { useState } from "react";
+import { Cell, Pie, PieChart } from "recharts";
+
+import Chart from "../../components/Chart";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/app/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/components/ui/select";
+
+const expenseData = [
+  { label: "Grocery", value: 20, fill: "var(--color-grocery)" },
+  { label: "Medical Care", value: 15, fill: "var(--color-medical)" },
+  { label: "Shopping", value: 10, fill: "var(--color-shopping)" },
+  { label: "Entertainment", value: 17, fill: "var(--color-entertainment)" },
 ];
 
-const AnalyticsandExpenciesSection = () => {
-  const [time, setTime] = useState("");
+const expenseConfig = {
+  value: { label: "Spend" },
+  grocery: { label: "Grocery", color: "hsl(var(--chart-1))" },
+  medical: { label: "Medical Care", color: "hsl(var(--chart-2))" },
+  shopping: { label: "Shopping", color: "hsl(var(--chart-3))" },
+  entertainment: { label: "Entertainment", color: "hsl(var(--chart-4))" },
+};
 
-  const handleChange = (e) => {
-    setTime(e.target.value);
-  };
+const AnalyticsandExpenciesSection = () => {
+  const [time, setTime] = useState("Month");
 
   return (
-    <div className="flex flex-col md:flex-row space-y-5 md:space-y-0 md:space-x-4 my-5">
-      <div className="rounded-md shadow-md flex-[1]">
+    <div className="my-5 flex flex-col space-y-5 md:flex-row md:space-y-0 md:space-x-4">
+      <div className="flex-[1] rounded-md shadow-md">
         <Chart />
       </div>
-      <div className="p-3 rounded-md shadow-md flex-[1]">
+
+      <div className="flex-[1] rounded-md p-3 shadow-md">
         <div className="flex align-center justify-between">
           <span>All Expencies</span>
 
-          <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-            <InputLabel id="demo-select-small-label">Time</InputLabel>
-            <Select
-              labelId="demo-select-small-label"
-              id="demo-select-small"
-              value={time}
-              label="Age"
-              onChange={handleChange}
-            >
-              <MenuItem value="Day">Day</MenuItem>
-              <MenuItem value="Month">Month</MenuItem>
-              <MenuItem value="Year">Year</MenuItem>
-            </Select>
-          </FormControl>
+          <Select value={time} onValueChange={setTime}>
+            <SelectTrigger id="time-filter" className="w-[120px]">
+              <SelectValue placeholder="Time" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Day">Day</SelectItem>
+              <SelectItem value="Month">Month</SelectItem>
+              <SelectItem value="Year">Year</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <div>
-          <PieChart
-            series={[
-              {
-                data,
-                highlightScope: { faded: "global", highlighted: "item" },
-                faded: {
-                  innerRadius: 30,
-                  additionalRadius: -10,
-                  color: "gray",
-                },
-              },
-            ]}
-            height={150}
-          />
-        </div>
+        <ChartContainer
+          config={expenseConfig}
+          className="mx-auto aspect-square max-h-[150px]"
+        >
+          <PieChart>
+            <ChartTooltip content={<ChartTooltipContent nameKey="label" />} />
+            <Pie
+              data={expenseData}
+              dataKey="value"
+              nameKey="label"
+              innerRadius={30}
+              strokeWidth={5}
+            >
+              {expenseData.map((entry) => (
+                <Cell key={entry.label} fill={entry.fill} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ChartContainer>
       </div>
     </div>
   );

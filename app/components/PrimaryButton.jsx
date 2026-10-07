@@ -1,11 +1,11 @@
 "use client";
-import { Button } from "@mui/material";
+import { Button } from "@/app/components/ui/button";
 
-const PrimaryButton = ({ text }) => {
+const PrimaryButton = ({ text, ...props }) => {
   return (
     <Button
-      variant="contained"
-      className="hover:bg-primary w-fit bg-primary text-primary_variant"
+      className="w-fit bg-primary text-primary-foreground hover:bg-primary/90"
+      {...props}
     >
       {text}
     </Button>
