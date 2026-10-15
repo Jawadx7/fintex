@@ -16,6 +16,8 @@ const CANDIDATES = [
 ].filter(Boolean);
 
 const BASE = process.env.BASE_URL || "http://localhost:3000";
+const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || "admin@fintex.app";
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || "fintex-admin-2026";
 const results = [];
 
 const check = (name, pass, extra = "") => {
@@ -45,6 +47,15 @@ const typeInto = async (page, name, value) => {
   const sel = `input[name="${name}"]`;
   if (value instanceof Date) return;
   await page.type(sel, value);
+};
+
+// Logs a page in through the real form and waits for the post-login landing.
+const logIn = async (page, email, password, expected = /^\/(account|admin)/) => {
+  await page.goto(`${BASE}/auth/login`, { waitUntil: "networkidle2" });
+  await page.type('input[name="email"]', email);
+  await page.type('input[name="password"]', password);
+  await page.click('button[type="submit"]');
+  await waitForPath(page, expected);
 };
 
 // Signup is a two-step form: step 1 creates the account, step 2 collects the
@@ -118,6 +129,13 @@ try {
     `url=${new URL(pAnon.url()).pathname}`);
   check("callbackUrl is preserved in the redirect",
     decodeURIComponent(pAnon.url()).includes("/account"));
+
+  // Anonymous visitors must not reach the staff area either.
+  await pAnon.goto(`${BASE}/admin/compliance`, { waitUntil: "networkidle2" });
+  check("admin route bounces anonymous user", pAnon.url().includes("/auth/login"),
+    `url=${new URL(pAnon.url()).pathname}`);
+  check("admin callbackUrl is preserved in the redirect",
+    decodeURIComponent(pAnon.url()).includes("/admin/compliance"));
 
   // The proxy also matches the auth routes now; a signed-out visitor must be
   // able to load the forms without bouncing in a redirect loop.
@@ -282,6 +300,87 @@ try {
     new URL(p5.url()).pathname === "/account",
     `url=${new URL(p5.url()).pathname}`);
   await ctx9.close();
+
+  // ---------- 10. role-based routing & admin area ----------
+  console.log("\n=== J. ROLES & ADMIN AREA ===");
+
+  // Non-admin (the signup user from section C) is kept out of /admin.
+  const ctxUser = await browser.createBrowserContext();
+  const pUser = await ctxUser.newPage();
+  await logIn(pUser, email, password);
+  check("non-admin lands on /account after login",
+    new URL(pUser.url()).pathname === "/account",
+    `url=${new URL(pUser.url()).pathname}`);
+  await pUser.goto(`${BASE}/admin/compliance`, { waitUntil: "networkidle2" });
+  check("non-admin is redirected away from /admin",
+    new URL(pUser.url()).pathname === "/account",
+    `url=${new URL(pUser.url()).pathname}`);
+  const userMe = await pUser.evaluate(async () => {
+    const res = await fetch("/api/admin/me");
+    return { status: res.status, body: await res.json().catch(() => null) };
+  });
+  check("non-admin API /api/admin/me is 403", userMe.status === 403,
+    `status=${userMe.status}`);
+  await ctxUser.close();
+
+  // Admin lands on the compliance dashboard and the API reports the role.
+  const ctxAdmin = await browser.createBrowserContext();
+  const pAdmin = await ctxAdmin.newPage();
+  await logIn(pAdmin, ADMIN_EMAIL, ADMIN_PASSWORD, /^\/admin/);
+  check("admin lands on /admin/compliance after login",
+    new URL(pAdmin.url()).pathname === "/admin/compliance",
+    `url=${new URL(pAdmin.url()).pathname}`);
+  const adminBody = await pAdmin.$eval("body", (e) => e.innerText);
+  check("admin shell shows the compliance page", /compliance/i.test(adminBody));
+  check("admin shell marks data as synthetic", /synthetic demo data/i.test(adminBody));
+  const adminMe = await pAdmin.evaluate(async () => {
+    const res = await fetch("/api/admin/me");
+    return { status: res.status, body: await res.json().catch(() => null) };
+  });
+  check("admin API /api/admin/me is 200 with role ADMIN",
+    adminMe.status === 200 && adminMe.body?.role === "ADMIN",
+    `status=${adminMe.status} role=${adminMe.body?.role}`);
+
+  // Signed-in admin visiting an auth page is bounced to the admin home.
+  await pAdmin.goto(`${BASE}/auth/login`, { waitUntil: "networkidle2" });
+  check("signed-in admin is bounced off /auth/login to /admin/compliance",
+    new URL(pAdmin.url()).pathname === "/admin/compliance",
+    `url=${new URL(pAdmin.url()).pathname}`);
+  await ctxAdmin.close();
+
+  const ctxEvil = await browser.createBrowserContext();
+  const pEvil = await ctxEvil.newPage();
+  await logIn(pEvil, email, password);
+  // /auth/continue is where callbackUrl is resolved; a protocol-relative or
+  // absolute URL must be rejected in favour of the role default.
+  await pEvil.goto(
+    `${BASE}/auth/continue?callbackUrl=${encodeURIComponent("//example.com/evil")}`,
+    { waitUntil: "networkidle2" },
+  );
+  check("protocol-relative callbackUrl is not followed",
+    new URL(pEvil.url()).host === new URL(BASE).host &&
+      new URL(pEvil.url()).pathname === "/account",
+    `url=${pEvil.url()}`);
+  await pEvil.goto(
+    `${BASE}/auth/continue?callbackUrl=${encodeURIComponent("https://example.com/evil")}`,
+    { waitUntil: "networkidle2" },
+  );
+  check("absolute callbackUrl is not followed",
+    new URL(pEvil.url()).host === new URL(BASE).host &&
+      new URL(pEvil.url()).pathname === "/account",
+    `url=${pEvil.url()}`);
+  await ctxEvil.close();
+
+  // Anonymous API access is unauthorized.
+  const ctxAnonApi = await browser.createBrowserContext();
+  const pAnonApi = await ctxAnonApi.newPage();
+  await pAnonApi.goto(`${BASE}/auth/login`, { waitUntil: "networkidle2" });
+  const anonMe = await pAnonApi.evaluate(async () => {
+    const res = await fetch("/api/admin/me");
+    return res.status;
+  });
+  check("anonymous API /api/admin/me is 401", anonMe === 401, `status=${anonMe}`);
+  await ctxAnonApi.close();
 
   check("no uncaught page errors", pageErrors.length === 0, pageErrors[0] || "");
 } finally {

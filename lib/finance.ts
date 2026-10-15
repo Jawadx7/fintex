@@ -1,7 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/session";
+import { requireUser } from "@/lib/auth/guards";
 
 /** Display shape the transaction table renders. */
 export type TransactionRow = {

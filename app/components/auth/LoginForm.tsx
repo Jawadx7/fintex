@@ -8,9 +8,15 @@ import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { authenticateUser, type AuthActionState } from "@/app/actions/auth";
-import { getPostLoginPath } from "@/lib/auth/redirects";
 
 const initialState: AuthActionState = {};
+
+// Demo helper is opt-in at build time; without the flag (and both values) no
+// credentials are ever shipped to the browser.
+const showDemoLogin = process.env.NEXT_PUBLIC_SHOW_DEMO_LOGIN === "true";
+const demoAdminEmail = process.env.NEXT_PUBLIC_DEMO_ADMIN_EMAIL ?? "";
+const demoAdminPassword = process.env.NEXT_PUBLIC_DEMO_ADMIN_PASSWORD ?? "";
+const canShowDemo = showDemoLogin && Boolean(demoAdminEmail && demoAdminPassword);
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -23,12 +29,15 @@ const LoginForm = () => {
 
   useEffect(() => {
     if (!state.success) return;
-    // Read the callbackUrl from the URL rather than useSearchParams(), which
-    // would force this statically-prerendered page into a Suspense boundary.
+    // Delegate to /auth/continue, which knows the signed-in user's role and
+    // validates the callbackUrl, so role-based landing lives on the server.
     const callbackUrl = new URLSearchParams(window.location.search).get(
       "callbackUrl"
     );
-    router.push(callbackUrl ?? getPostLoginPath());
+    const params = new URLSearchParams();
+    if (callbackUrl) params.set("callbackUrl", callbackUrl);
+    const query = params.toString();
+    router.push(`/auth/continue${query ? `?${query}` : ""}`);
     router.refresh();
   }, [state.success, router]);
 
@@ -90,6 +99,26 @@ const LoginForm = () => {
           {isPending ? "Logging in..." : "Log in"}
         </Button>
       </form>
+
+      {canShowDemo && (
+        <div className="mt-4 rounded-md border border-dashed p-3">
+          <p className="text-xs text-muted-foreground">
+            Demo environment
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-2 w-full"
+            onClick={() => {
+              setEmail(demoAdminEmail);
+              setPassword(demoAdminPassword);
+            }}
+          >
+            Fill demo admin credentials
+          </Button>
+        </div>
+      )}
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}

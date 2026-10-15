@@ -1,9 +1,10 @@
 "use server";
 
-import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
 
-import { BCRYPT_ROUNDS, auth, signIn, signOut } from "@/auth";
+import { signIn, signOut } from "@/auth";
+import { requireUser } from "@/lib/auth/guards";
+import { hashPassword } from "@/lib/auth/password";
 import { prisma } from "@/lib/prisma";
 import {
   loginSchema,
@@ -42,7 +43,7 @@ export async function registerUser(
     return { fieldErrors: toFieldErrors(parsed.error) };
   }
 
-  const { confirmPassword, email, password, ...identity } = parsed.data;
+  const { confirmPassword, email, password, firstName, lastName } = parsed.data;
 
   if (confirmPassword !== password) {
     return { fieldErrors: { confirmPassword: "Passwords do not match" } };
@@ -61,11 +62,15 @@ export async function registerUser(
     };
   }
 
-  const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+  const passwordHash = await hashPassword(password);
 
+  // Explicit field list on purpose: never spread the request body, and never
+  // accept a client-supplied `role`. Role falls back to the schema default
+  // (USER) so a payload containing role:"ADMIN" cannot escalate privileges.
   await prisma.user.create({
     data: {
-      ...identity,
+      firstName,
+      lastName,
       email: normalizedEmail,
       passwordHash,
     },
@@ -89,17 +94,13 @@ export async function registerUser(
 
 // Signup step 2: attaches the remaining profile details to the account that
 // step 1 already created, so it runs against the session rather than
-// re-creating the user.
+// re-creating the user. Server Actions are not covered by proxy.ts, so the
+// guard runs here too.
 export async function updateProfile(
   _prevState: AuthActionState,
   formData: FormData
 ): Promise<AuthActionState> {
-  const session = await auth();
-  const userId = session?.user?.id;
-
-  if (!userId) {
-    return { formError: "Your session expired. Please log in again." };
-  }
+  const user = await requireUser();
 
   const parsed = profileSchema.safeParse({
     address: text(formData, "address"),
@@ -116,7 +117,7 @@ export async function updateProfile(
   const { birthDate, ...profile } = parsed.data;
 
   await prisma.user.update({
-    where: { id: userId },
+    where: { id: user.id },
     data: { ...profile, birthDate: new Date(birthDate) },
   });
 

@@ -1,12 +1,15 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
 
 import { authConfig } from "@/auth.config";
 import { prisma } from "@/lib/prisma";
+import { verifyPassword } from "@/lib/auth/password";
 import { loginSchema } from "@/lib/validation";
 
-export const BCRYPT_ROUNDS = 10;
+// A valid-shaped bcrypt hash that never matches, used so a missing account and
+// a wrong password take a similar amount of time.
+const INVALID_PASSWORD_HASH =
+  "$2a$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinva";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -29,9 +32,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         // Always run a comparison so a missing account and a wrong password
         // take a similar amount of time.
-        const passwordMatches = await bcrypt.compare(
+        const passwordMatches = await verifyPassword(
           password,
-          user?.passwordHash ?? "$2a$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinva"
+          user?.passwordHash ?? INVALID_PASSWORD_HASH
         );
 
         if (!user || !passwordMatches) return null;
@@ -40,18 +43,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user.id,
           email: user.email,
           name: `${user.firstName} ${user.lastName}`,
+          role: user.role,
         };
       },
     }),
   ],
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) token.id = user.id;
-      return token;
-    },
-    session({ session, token }) {
-      if (token.id) session.user.id = token.id as string;
-      return session;
-    },
-  },
 });

@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/session";
+import { requireUser } from "@/lib/auth/guards";
 
 // Force every page in the (private) group to render per-request so the session
 // is always verified against the incoming request, never a cached shell.

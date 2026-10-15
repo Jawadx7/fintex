@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
-import bcrypt from "bcryptjs";
 
+import { hashPassword } from "../lib/auth/password";
 import {
   PrismaClient,
   type AccountType,
@@ -19,9 +19,12 @@ const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString }),
 });
 
-const DEMO_EMAIL = "demo@fintex.app";
-const DEMO_PASSWORD = "fintex-demo-2026";
-const BCRYPT_ROUNDS = 10;
+// Overridable so local/CI environments don't rely on baked-in credentials.
+const DEMO_EMAIL = process.env.SEED_DEMO_EMAIL ?? "demo@fintex.app";
+const DEMO_PASSWORD = process.env.SEED_DEMO_PASSWORD ?? "fintex-demo-2026";
+
+const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL ?? "admin@fintex.app";
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? "fintex-admin-2026";
 
 // Everyday counterparties and merchants, replacing the anime-character
 // placeholders that previously lived in public/data/transactions.js.
@@ -72,16 +75,39 @@ function referenceFor(index: number): string {
 async function main() {
   console.log("Seeding Fintex demo data...\n");
 
-  await prisma.transaction.deleteMany();
-  await prisma.account.deleteMany();
-  await prisma.user.deleteMany();
+  // Upserts keep the seed re-runnable: re-running updates credentials/role in
+  // place instead of wiping users who may have signed up meanwhile.
+  const adminPasswordHash = await hashPassword(ADMIN_PASSWORD);
+  const admin = await prisma.user.upsert({
+    where: { email: ADMIN_EMAIL },
+    update: {
+      passwordHash: adminPasswordHash,
+      role: "ADMIN",
+      firstName: "Fintex",
+      lastName: "Admin",
+    },
+    create: {
+      email: ADMIN_EMAIL,
+      passwordHash: adminPasswordHash,
+      role: "ADMIN",
+      firstName: "Fintex",
+      lastName: "Admin",
+    },
+  });
 
-  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, BCRYPT_ROUNDS);
-
-  const user = await prisma.user.create({
-    data: {
+  const demoPasswordHash = await hashPassword(DEMO_PASSWORD);
+  const user = await prisma.user.upsert({
+    where: { email: DEMO_EMAIL },
+    update: {
+      passwordHash: demoPasswordHash,
+      role: "USER",
+      firstName: "Amara",
+      lastName: "Okonkwo",
+    },
+    create: {
       email: DEMO_EMAIL,
-      passwordHash,
+      passwordHash: demoPasswordHash,
+      role: "USER",
       firstName: "Amara",
       lastName: "Okonkwo",
       address: "418 Harborview Lane",
@@ -91,6 +117,9 @@ async function main() {
       idNumber: "ID-4820-9931",
     },
   });
+
+  // Reset the demo user's accounts; transactions cascade off the delete.
+  await prisma.account.deleteMany({ where: { userId: user.id } });
 
   const accountSpecs: Array<{
     name: string;
@@ -175,8 +204,10 @@ async function main() {
 
   await prisma.transaction.createMany({ data: rows });
 
-  console.log(`  user:     ${user.email}`);
-  console.log(`  password: ${DEMO_PASSWORD}`);
+  console.log(`  admin:    ${admin.email}`);
+  console.log(`  admin pw: ${ADMIN_PASSWORD}`);
+  console.log(`  demo:     ${user.email}`);
+  console.log(`  demo pw:  ${DEMO_PASSWORD}`);
   console.log(`  accounts: ${accounts.length}`);
   console.log(`  transactions: ${rows.length}`);
   console.log("\nDone.");
