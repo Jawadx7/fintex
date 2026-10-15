@@ -23,12 +23,14 @@ function initials(name: string, email: string): string {
   return source.slice(0, 2).toUpperCase();
 }
 
-export default function AdminUserMenu({
+export default function AppUserMenu({
   name,
   email,
+  fallbackLabel = "User",
 }: {
   name: string;
   email: string;
+  fallbackLabel?: string;
 }) {
   return (
     <DropdownMenu>
@@ -44,7 +46,7 @@ export default function AdminUserMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="grid gap-0.5">
-          <span className="truncate font-semibold">{name || "Admin"}</span>
+          <span className="truncate font-semibold">{name || fallbackLabel}</span>
           <span className="truncate text-xs font-normal text-muted-foreground">
             {email}
           </span>

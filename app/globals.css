@@ -65,6 +65,7 @@
     --radius: 0.5rem;
 
     --sidebar: 174 20% 98%;
+    --sidebar-background: 174 20% 98%;
     --sidebar-foreground: 174 20% 12%;
     --sidebar-primary: 174 27% 22%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -72,6 +73,59 @@
     --sidebar-accent-foreground: 174 27% 22%;
     --sidebar-border: 150 9% 87%;
     --sidebar-ring: 174 27% 22%;
+
+    /* App-shell surfaces: `chrome` is the sidebar/top-bar tone, `panel` is the
+       main content panel (a step lighter in dark, a step greyer in light). */
+    --chrome: 174 18% 95%;
+    --panel: 0 0% 100%;
+  }
+
+  /* Admin/compliance dark theme. Toggled by adding `.dark` to <html>; the
+     sonner Toaster watches the same class. */
+  .dark {
+    --primary: 174 40% 60%;
+    --primary-foreground: 174 40% 10%;
+
+    --background: 174 25% 8%;
+    --foreground: 150 12% 94%;
+
+    --card: 174 22% 11%;
+    --card-foreground: 150 12% 94%;
+    --popover: 174 22% 11%;
+    --popover-foreground: 150 12% 94%;
+
+    --secondary: 174 15% 18%;
+    --secondary-foreground: 150 12% 94%;
+    --muted: 174 15% 18%;
+    --muted-foreground: 150 8% 65%;
+    --accent: 174 15% 20%;
+    --accent-foreground: 150 12% 94%;
+
+    --destructive: 0 62% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 174 12% 22%;
+    --input: 174 12% 22%;
+    --ring: 174 40% 60%;
+
+    --chart-1: 174 45% 55%;
+    --chart-2: 38 55% 60%;
+    --chart-3: 174 15% 55%;
+    --chart-4: 174 40% 45%;
+    --chart-5: 25 35% 55%;
+
+    --sidebar: 174 22% 10%;
+    --sidebar-background: 174 22% 10%;
+    --sidebar-foreground: 150 12% 94%;
+    --sidebar-primary: 174 40% 60%;
+    --sidebar-primary-foreground: 174 40% 10%;
+    --sidebar-accent: 174 15% 18%;
+    --sidebar-accent-foreground: 150 12% 94%;
+    --sidebar-border: 174 12% 22%;
+    --sidebar-ring: 174 40% 60%;
+
+    --chrome: 174 22% 9%;
+    --panel: 174 22% 13%;
   }
 }
 

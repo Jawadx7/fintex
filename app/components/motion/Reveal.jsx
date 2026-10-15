@@ -43,7 +43,7 @@ export function Reveal({
   return (
     <MotionTag
       className={className}
-      initial="hidden"
+      initial={reduceMotion ? "shown" : "hidden"}
       whileInView="shown"
       viewport={{ once: true, amount: 0.25 }}
       variants={reduceMotion ? fadeUp : variants[direction]}
@@ -72,7 +72,7 @@ export function Stagger({
   return (
     <MotionTag
       className={className}
-      initial="hidden"
+      initial={reduceMotion ? "shown" : "hidden"}
       whileInView="shown"
       viewport={{ once: true, amount: 0.2 }}
       variants={{

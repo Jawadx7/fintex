@@ -11,7 +11,7 @@ datasource db {
 }
 
 // Auth.js v5 uses JWT sessions, so no Session/VerificationToken tables are
-// needed. "Account" here is a user's bank account, not an OAuth account.
+// needed. Users here are app accounts (staff or customers), not OAuth accounts.
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -27,50 +27,55 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  accounts     Account[]
-  transactions Transaction[]
+  riskReviews RiskAssessment[] @relation("Reviewer")
 }
 
-model Account {
-  id        String        @id @default(cuid())
-  userId    String
-  name      String
-  type      AccountType
-  currency  String        @default("USD")
-  balance   Decimal       @db.Decimal(12, 2)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
-
-  @@index([userId])
-}
-
+// Wallet-based transaction scored by the compliance engine. This is the output
+// contract the future scoring pipeline writes; see lib/compliance/schemas.ts.
 model Transaction {
-  id         String            @id @default(cuid())
-  reference  String            @unique
-  userId     String
-  accountId  String
-  name       String
-  type       TransactionType
-  amount     Decimal           @db.Decimal(12, 2)
-  status     TransactionStatus @default(SUCCESS)
-  charges    Decimal           @default(0) @db.Decimal(12, 2)
-  occurredAt DateTime          @default(now())
-  createdAt  DateTime          @default(now())
+  id                  String          @id @default(cuid())
+  idempotencyKey      String          @unique
+  type                TransactionType
+  amount              Decimal         @db.Decimal(14, 2)
+  currency            String          @default("GHS")
+  senderWallet        String
+  receiverWallet      String
+  senderBalanceBefore Decimal?        @db.Decimal(14, 2)
+  occurredAt          DateTime
+  createdAt           DateTime        @default(now())
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  assessment RiskAssessment?
 
-  @@index([userId])
-  @@index([accountId])
+  // The rules engine looks up wallet history by time window.
+  @@index([senderWallet, occurredAt])
+  @@index([receiverWallet, occurredAt])
 }
 
-enum AccountType {
-  CHECKING
-  SAVINGS
-  INVESTMENT
+// One-to-one scoring result for a Transaction.
+model RiskAssessment {
+  id            String       @id @default(cuid())
+  transactionId String       @unique
+  riskScore     Float
+  tier          RiskTier
+  action        RiskAction
+  tags          String[]
+  reasons       String[]
+  evidence      Json?
+  modelVersion  String
+  latencyMs     Int?
+  createdAt     DateTime     @default(now())
+
+  // Review workflow. A null reviewStatus means no review is required.
+  reviewStatus ReviewStatus?
+  reviewedById String?
+  reviewedAt   DateTime?
+  reviewNote   String?
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  reviewedBy  User?       @relation("Reviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([tier, createdAt])
+  @@index([reviewStatus])
 }
 
 enum Role {
@@ -79,14 +84,25 @@ enum Role {
 }
 
 enum TransactionType {
-  SEND
-  RECEIVE
-  WITHDRAWAL
-  DEPOSIT
+  TRANSFER
+  CASH_OUT
 }
 
-enum TransactionStatus {
-  SUCCESS
-  PENDING
-  FAILED
+enum RiskTier {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum RiskAction {
+  ALLOW
+  ALLOW_AND_REVIEW
+  HOLD_AND_ALERT
+}
+
+enum ReviewStatus {
+  OPEN
+  ESCALATED
+  DISMISSED
+  CONFIRMED
 }

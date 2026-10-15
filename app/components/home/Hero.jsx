@@ -35,12 +35,7 @@ const Hero = () => {
           <span className="text-[#294744]">money</span>
         </h1>
 
-        <p className="mt-4">
-          Experience seamless financial management like never before. With our
-          innovative fintech solutions, we empower you to take control of your
-          finances with ease and efficiency.
-        </p>
-        <p className="my-5">
+        <p className="mt-4 mb-5">
           Experience seamless financial management like never before. With our
           innovative fintech solutions, we empower you to take control of your
           finances with ease and efficiency.

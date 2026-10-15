@@ -13,6 +13,15 @@ const AUTH_ROUTES = ["/auth/login", "/auth/signup"];
 
 export const proxy = auth((request) => {
   const { nextUrl } = request;
+
+  // Server Actions POST to the page that defines them (e.g. the signup step-2
+  // action posts to /auth/signup). Those requests must reach the action, whose
+  // own guard runs server-side; treating them as navigations would redirect the
+  // POST and surface "an unexpected response was received from the server".
+  if (request.headers.get("next-action")) {
+    return NextResponse.next();
+  }
+
   const user = request.auth?.user;
   const isLoggedIn = Boolean(user);
   // Normalise so a trailing slash can't defeat the route checks.

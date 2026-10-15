@@ -1,38 +1,29 @@
-import { ShieldCheck } from "lucide-react";
+import { Suspense } from "react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/app/components/ui/card";
+import AlertsDashboard from "@/app/components/admin/compliance/alerts-dashboard";
+import { Skeleton } from "@/app/components/ui/skeleton";
+
+export const dynamic = "force-dynamic";
+
+function DashboardFallback() {
+  return (
+    <div className="grid gap-6">
+      <Skeleton className="h-10 w-64" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-24 rounded-xl" />
+        ))}
+      </div>
+      <Skeleton className="h-72 rounded-xl" />
+      <Skeleton className="h-96 rounded-xl" />
+    </div>
+  );
+}
 
 export default function CompliancePage() {
   return (
-    <div className="grid gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">Compliance</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Review and action compliance cases for this workspace.
-        </p>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>No cases yet</CardTitle>
-          <CardDescription>
-            Compliance cases will appear here once reviews are available. This
-            environment uses synthetic demo data only.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-12 text-center text-muted-foreground">
-            <ShieldCheck className="h-8 w-8" />
-            <p className="text-sm">Nothing to review right now.</p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <Suspense fallback={<DashboardFallback />}>
+      <AlertsDashboard />
+    </Suspense>
   );
 }

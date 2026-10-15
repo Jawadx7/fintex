@@ -21,6 +21,8 @@ module.exports = {
   			gold_fade: '#eaff00c1',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
+  			chrome: 'hsl(var(--chrome))',
+  			panel: 'hsl(var(--panel))',
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
@@ -53,7 +55,7 @@ module.exports = {
   				'5': 'hsl(var(--chart-5))'
   			},
   			sidebar: {
-  				DEFAULT: 'hsl(var(--sidebar))',
+  				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',
   				primary: 'hsl(var(--sidebar-primary))',
   				'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',

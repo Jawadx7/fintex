@@ -382,6 +382,288 @@ try {
   check("anonymous API /api/admin/me is 401", anonMe === 401, `status=${anonMe}`);
   await ctxAnonApi.close();
 
+  // ---------- 11. compliance alerts API, dashboard & review (3.3) ----------
+  console.log("\n=== K. COMPLIANCE ALERTS API & DASHBOARD ===");
+
+  // Anonymous callers are unauthorized.
+  const ctxK1 = await browser.createBrowserContext();
+  const pK1 = await ctxK1.newPage();
+  await pK1.goto(`${BASE}/auth/login`, { waitUntil: "networkidle2" });
+  const anonAlerts = await pK1.evaluate(() => fetch("/api/admin/alerts").then((r) => r.status));
+  check("anonymous API /api/admin/alerts is 401", anonAlerts === 401, `status=${anonAlerts}`);
+  await ctxK1.close();
+
+  // Non-admins are forbidden.
+  const ctxK2 = await browser.createBrowserContext();
+  const pK2 = await ctxK2.newPage();
+  await logIn(pK2, email, password);
+  const userAlerts = await pK2.evaluate(() => fetch("/api/admin/alerts").then((r) => r.status));
+  check("non-admin API /api/admin/alerts is 403", userAlerts === 403, `status=${userAlerts}`);
+  await ctxK2.close();
+
+  const ctxK3 = await browser.createBrowserContext();
+  const pK3 = await ctxK3.newPage();
+  const complianceErrors = [];
+  pK3.on("pageerror", (e) => complianceErrors.push(String(e)));
+  await logIn(pK3, ADMIN_EMAIL, ADMIN_PASSWORD, /^\/admin/);
+
+  const alerts = await pK3.evaluate(async () => {
+    const res = await fetch("/api/admin/alerts");
+    return { status: res.status, body: await res.json() };
+  });
+  check("admin API /api/admin/alerts is 200", alerts.status === 200, `status=${alerts.status}`);
+  check("default page returns the pagination envelope",
+    alerts.body.page === 1 && alerts.body.pageSize === 10 &&
+      typeof alerts.body.total === "number" &&
+      typeof alerts.body.totalPages === "number",
+    `page=${alerts.body.page} size=${alerts.body.pageSize} total=${alerts.body.total} pages=${alerts.body.totalPages}`);
+  check("flagged list is non-empty and excludes LOW",
+    Array.isArray(alerts.body.items) && alerts.body.items.length > 0 &&
+      alerts.body.items.every((i) => i.tier !== "LOW") &&
+      alerts.body.items.length <= alerts.body.pageSize,
+    `count=${alerts.body.items?.length}`);
+  check("money is serialized as a string",
+    typeof alerts.body.items?.[0]?.amount === "string",
+    `amount=${alerts.body.items?.[0]?.amount}`);
+
+  const flaggedTotal = alerts.body.total;
+  const flaggedPages = alerts.body.totalPages;
+
+  // The last page holds the remainder (derived from the response, not a magic
+  // number), so a partial final page is exercised whenever the seed is longer
+  // than one page.
+  const last = await pK3.evaluate(
+    (page) => fetch(`/api/admin/alerts?page=${page}`).then((r) => r.json()),
+    flaggedPages,
+  );
+  const expectedRemainder = flaggedTotal - (flaggedPages - 1) * 10;
+  check("last page returns the remainder",
+    last.items.length === expectedRemainder && expectedRemainder > 0,
+    `rows=${last.items.length} expected=${expectedRemainder}`);
+
+  // Out-of-range pages clamp instead of erroring.
+  const clamp = await pK3.evaluate(async () => {
+    const res = await fetch("/api/admin/alerts?page=999");
+    return { status: res.status, body: await res.json() };
+  });
+  check("out-of-range page clamps to the last page",
+    clamp.status === 200 && clamp.body.page === clamp.body.totalPages,
+    `status=${clamp.status} page=${clamp.body.page} pages=${clamp.body.totalPages}`);
+
+  // pageSize is capped at the documented maximum.
+  const capped = await pK3.evaluate(() =>
+    fetch("/api/admin/alerts?pageSize=999").then((r) => r.json()));
+  check("pageSize above the maximum is capped at 50",
+    capped.pageSize === 50, `pageSize=${capped.pageSize}`);
+
+  const cleared = await pK3.evaluate(() =>
+    fetch("/api/admin/alerts?includeCleared=true&pageSize=50").then((r) => r.json()));
+  check("includeCleared=true returns a larger total",
+    cleared.total > flaggedTotal,
+    `cleared=${cleared.total} flagged=${flaggedTotal}`);
+
+  const highOnly = await pK3.evaluate(() =>
+    fetch("/api/admin/alerts?tier=HIGH&pageSize=50").then((r) => r.json()));
+  check("tier=HIGH filter returns only HIGH",
+    highOnly.items.length > 0 && highOnly.items.every((i) => i.tier === "HIGH"),
+    `count=${highOnly.items.length}`);
+  check("tier=HIGH changes the reported total",
+    highOnly.total < flaggedTotal,
+    `high=${highOnly.total} flagged=${flaggedTotal}`);
+
+  const badQuery = await pK3.evaluate(() =>
+    fetch("/api/admin/alerts?tier=NOPE").then((r) => r.status));
+  check("invalid query is rejected with 400", badQuery === 400, `status=${badQuery}`);
+
+  const summary = await pK3.evaluate(() =>
+    fetch("/api/admin/alerts/summary?range=all").then((r) => r.json()));
+  check("summary reports flagged and high totals",
+    summary.totals?.flagged > 0 && summary.totals.high > 0,
+    `flagged=${summary.totals?.flagged} high=${summary.totals?.high}`);
+  check("summary includes per-tag aggregates",
+    Array.isArray(summary.byTag) && summary.byTag.length > 0,
+    `tags=${summary.byTag?.length}`);
+
+  // Detail endpoint + review persistence.
+  const firstId = alerts.body.items[0].id;
+  const detail = await pK3.evaluate(async (id) => {
+    const res = await fetch(`/api/admin/alerts/${id}`);
+    return { status: res.status, body: await res.json() };
+  }, firstId);
+  check("detail endpoint returns 200", detail.status === 200, `status=${detail.status}`);
+  check("detail includes reasons and sender history",
+    Array.isArray(detail.body.reasons) && detail.body.reasons.length > 0 &&
+      Array.isArray(detail.body.senderHistory),
+    `reasons=${detail.body.reasons?.length} history=${detail.body.senderHistory?.length}`);
+
+  const notFound = await pK3.evaluate(() =>
+    fetch("/api/admin/alerts/does-not-exist").then((r) => r.status));
+  check("unknown alert id is 404", notFound === 404, `status=${notFound}`);
+
+  const nextStatus = detail.body.reviewStatus === "CONFIRMED" ? "OPEN" : "CONFIRMED";
+  const patched = await pK3.evaluate(async ({ id, status }) => {
+    const res = await fetch(`/api/admin/alerts/${id}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ status, note: "e2e review" }),
+    });
+    return { status: res.status, body: await res.json() };
+  }, { id: firstId, status: nextStatus });
+  check("review PATCH returns 200 with the new status",
+    patched.status === 200 && patched.body.reviewStatus === nextStatus,
+    `status=${patched.status} review=${patched.body.reviewStatus}`);
+
+  const reread = await pK3.evaluate((id) =>
+    fetch(`/api/admin/alerts/${id}`).then((r) => r.json()).then((b) => b.reviewStatus), firstId);
+  check("review status persists across reads", reread === nextStatus, `status=${reread}`);
+
+  const badPatch = await pK3.evaluate((id) =>
+    fetch(`/api/admin/alerts/${id}`, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ status: "NOT_A_STATUS" }),
+    }).then((r) => r.status), firstId);
+  check("invalid review body is rejected with 400", badPatch === 400, `status=${badPatch}`);
+
+  // LOW assessments never require review. Fetch one directly so the guard is
+  // exercised regardless of where LOW rows fall in the page ordering.
+  const lowOnly = await pK3.evaluate(() =>
+    fetch("/api/admin/alerts?tier=LOW&pageSize=1").then((r) => r.json()));
+  check("LOW assessments are reachable via tier=LOW", lowOnly.total > 0,
+    `total=${lowOnly.total}`);
+  const lowItem = lowOnly.items?.[0];
+  if (lowItem) {
+    const lowPatch = await pK3.evaluate((id) =>
+      fetch(`/api/admin/alerts/${id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ status: "CONFIRMED" }),
+      }).then((r) => r.status), lowItem.id);
+    check("PATCH on a non-reviewable alert is 409", lowPatch === 409, `status=${lowPatch}`);
+  }
+
+  // Dashboard renders the table and honours the tier filter from the URL.
+  await pK3.goto(`${BASE}/admin/compliance?tier=HIGH`, { waitUntil: "networkidle2" });
+  await pK3.waitForSelector("table tbody tr", { timeout: 25000 }).catch(() => {});
+  const highRowCount = await pK3.$$eval("table tbody tr", (rows) => rows.length).catch(() => 0);
+  const dashBody = await pK3.$eval("body", (e) => e.innerText);
+  check("dashboard renders alert rows from the tier filter", highRowCount > 0, `rows=${highRowCount}`);
+  check("dashboard shows summary totals", /flagged/i.test(dashBody));
+  check("dashboard marks the environment as synthetic", /synthetic demo data/i.test(dashBody));
+  check("dashboard shows the showing-range label",
+    /Showing \d+\u2013\d+ of \d+/.test(dashBody));
+  check("dashboard renders numbered pagination",
+    !!(await pK3.$('nav[aria-label="pagination"]')));
+
+  // Page lives in the URL and changes the visible window.
+  await pK3.goto(`${BASE}/admin/compliance?tier=HIGH&page=2`, { waitUntil: "networkidle2" });
+  await pK3.waitForSelector("table tbody tr", { timeout: 25000 }).catch(() => {});
+  const page2Body = await pK3.$eval("body", (e) => e.innerText);
+  check("page=2 is kept in the URL",
+    new URL(pK3.url()).searchParams.get("page") === "2");
+  check("page 2 shows the next window of rows",
+    /Showing 11\u2013\d+ of \d+/.test(page2Body));
+
+  // Back from detail returns to the same page + filters.
+  await pK3.click("table tbody tr");
+  await pK3
+    .waitForFunction(() => /Why this was flagged/.test(document.body.innerText), { timeout: 25000 })
+    .catch(() => {});
+  const detailUrl = new URL(pK3.url());
+  const fromParam = detailUrl.searchParams.get("from") || "";
+  check("detail URL carries the list state via ?from=", detailUrl.searchParams.has("from"));
+  check("?from preserves page and filters",
+    fromParam.includes("page=2") && fromParam.includes("tier=HIGH"),
+    `from=${fromParam}`);
+
+  await pK3.click('a::-p-text(Back to alerts)');
+  await pK3.waitForSelector("table tbody tr", { timeout: 25000 }).catch(() => {});
+  const backUrl = new URL(pK3.url());
+  check("back returns to the same page + filters",
+    backUrl.pathname === "/admin/compliance" &&
+      backUrl.searchParams.get("page") === "2" &&
+      backUrl.searchParams.get("tier") === "HIGH",
+    `url=${backUrl.pathname}${backUrl.search}`);
+
+  // Detail page renders the analyst view.
+  await pK3.goto(`${BASE}/admin/compliance/${firstId}`, { waitUntil: "networkidle2" });
+  await pK3.waitForFunction(() => /Why this was flagged/.test(document.body.innerText), { timeout: 25000 })
+    .catch(() => {});
+  const detailBody = await pK3.$eval("body", (e) => e.innerText);
+  check("detail page renders the flagged reasons", /why this was flagged/i.test(detailBody));
+  check("detail page renders the sender timeline", /sender timeline/i.test(detailBody));
+  check("detail page renders the review panel", /decision/i.test(detailBody) && /save review/i.test(detailBody));
+
+  check("no uncaught errors on the compliance dashboard", complianceErrors.length === 0,
+    complianceErrors[0] || "");
+
+  // ---------- 12. theme scoping & app shell (3.4) ----------
+  console.log("\n=== L. THEME SCOPE & APP SHELL ===");
+
+  // Simulate an OS dark preference with no stored choice.
+  await pK3.evaluate(() => {
+    try {
+      localStorage.removeItem("fintex-theme");
+    } catch {}
+  });
+  await pK3.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "dark" }]);
+
+  // App area -> dark.
+  await pK3.goto(`${BASE}/admin/compliance`, { waitUntil: "networkidle2" });
+  await pK3
+    .waitForSelector("table tbody tr", { timeout: 25000 })
+    .catch(() => {});
+  const adminDark = await pK3.evaluate(() =>
+    document.documentElement.classList.contains("dark"));
+  check("admin area honours the dark preference", adminDark === true, `dark=${adminDark}`);
+
+  // Shell structure.
+  check("app shell renders the sidebar",
+    !!(await pK3.$('[data-sidebar="sidebar"]')));
+  const shellBody = await pK3.$eval("body", (e) => e.innerText);
+  check("app shell renders the collapse control", /collapse menu/i.test(shellBody));
+  check("app shell shows the synthetic-data badge", /synthetic demo data/i.test(shellBody));
+  const activeNav = await pK3
+    .$eval('a[aria-current="page"]', (el) => el.getAttribute("href"))
+    .catch(() => null);
+  check("active nav item is marked aria-current=page",
+    activeNav === "/admin/compliance", `href=${activeNav}`);
+
+  // Account area -> dark too.
+  await pK3.goto(`${BASE}/account`, { waitUntil: "networkidle2" });
+  const accountDark = await pK3.evaluate(() =>
+    document.documentElement.classList.contains("dark"));
+  check("account area honours the dark preference", accountDark === true, `dark=${accountDark}`);
+
+  // Public routes stay light under the same dark preference.
+  for (const route of ["/", "/auth/login", "/auth/signup"]) {
+    await pK3.goto(`${BASE}${route}`, { waitUntil: "networkidle2" });
+    const dark = await pK3.evaluate(() =>
+      document.documentElement.classList.contains("dark"));
+    check(`${route} stays light for a dark-preferring visitor`, dark === false, `dark=${dark}`);
+  }
+
+  // Toggling inside the app stores an explicit light preference.
+  await pK3.goto(`${BASE}/admin/compliance`, { waitUntil: "networkidle2" });
+  await pK3
+    .waitForSelector('button[aria-label^="Switch to"]', { timeout: 25000 })
+    .catch(() => {});
+  const toggled = await pK3.evaluate(() => {
+    const btn = document.querySelector('button[aria-label^="Switch to"]');
+    if (!btn) return null;
+    btn.click();
+    return {
+      dark: document.documentElement.classList.contains("dark"),
+      stored: localStorage.getItem("fintex-theme"),
+    };
+  });
+  check("theme toggle stores the light preference and clears dark",
+    toggled !== null && toggled.dark === false && toggled.stored === "light",
+    `dark=${toggled?.dark} stored=${toggled?.stored}`);
+
+  await pK3.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
+  await ctxK3.close();
+
   check("no uncaught page errors", pageErrors.length === 0, pageErrors[0] || "");
 } finally {
   await browser.close();
