@@ -34,11 +34,11 @@ const waitForPath = (page, re, timeout = 45000) =>
     re.source,
   );
 
-// The URL flips before React paints the dashboard, so wait for the private
-// shell (logout button) before asserting on rendered content.
+// The URL flips before React paints the account page, so wait for the account
+// header (sign-out button) before asserting on rendered content.
 const waitForApp = (page, timeout = 45000) =>
   page
-    .waitForSelector('button::-p-text(Log out)', { timeout, polling: 300 })
+    .waitForSelector('button::-p-text(Sign out)', { timeout, polling: 300 })
     .catch(() => {});
 
 const typeInto = async (page, name, value) => {
@@ -113,11 +113,11 @@ try {
   console.log("=== A. ANONYMOUS ACCESS (isolated context) ===");
   const anon = await browser.createBrowserContext();
   const pAnon = await anon.newPage();
-  await pAnon.goto(`${BASE}/application/transactions`, { waitUntil: "networkidle2" });
+  await pAnon.goto(`${BASE}/account`, { waitUntil: "networkidle2" });
   check("private route bounces anonymous user", pAnon.url().includes("/auth/login"),
     `url=${new URL(pAnon.url()).pathname}`);
   check("callbackUrl is preserved in the redirect",
-    decodeURIComponent(pAnon.url()).includes("/application/transactions"));
+    decodeURIComponent(pAnon.url()).includes("/account"));
 
   // The proxy also matches the auth routes now; a signed-out visitor must be
   // able to load the forms without bouncing in a redirect loop.
@@ -167,19 +167,17 @@ try {
       idNumber: "ID-9911-2233",
     },
   );
-  await waitForPath(p1, /^\/application/);
+  await waitForPath(p1, /^\/account/);
   await waitForApp(p1);
-  check("signup redirects into the dashboard", /^\/application/.test(new URL(p1.url()).pathname),
+  check("signup redirects into the account home", /^\/account/.test(new URL(p1.url()).pathname),
     `url=${new URL(p1.url()).pathname}`);
   check("signup issues a session cookie",
     (await p1.cookies()).some((c) => c.name === "authjs.session-token" && c.value));
 
-  const dashHtml = await p1.content();
-  const dashText = await p1.$eval("body", (e) => e.innerText);
-  check("dashboard greets the new user by name", /\bRin\b/.test(dashText));
-  check("new user shows a zero balance", /\$\s?0\b/.test(dashText));
-  check("new user sees no seeded transactions",
-    !/Adobe|Cedarline|Meridian|Aurora|Northgate/.test(dashHtml));
+  const accountText = await p1.$eval("body", (e) => e.innerText);
+  check("account home greets the new user by name", /\bRin\b/.test(accountText));
+  check("account home states the dashboard is a later release",
+    /later release/i.test(accountText));
 
   // ---------- 4. password validation ----------
   console.log("\n=== D. PASSWORD RULES ===");
@@ -213,9 +211,9 @@ try {
   await p2.type('input[name="email"]', email);
   await p2.type('input[name="password"]', password);
   await p2.click('button[type="submit"]');
-  await waitForPath(p2, /^\/application/);
+  await waitForPath(p2, /^\/account/);
   await waitForApp(p2);
-  check("login form authenticates and redirects", /^\/application/.test(new URL(p2.url()).pathname),
+  check("login form authenticates and redirects", /^\/account/.test(new URL(p2.url()).pathname),
     `url=${new URL(p2.url()).pathname}`);
   await ctxLogin.close();
 
@@ -223,15 +221,15 @@ try {
   console.log("\n=== F. callbackUrl ROUND-TRIP ===");
   const ctx2 = await browser.createBrowserContext();
   const p3 = await ctx2.newPage();
-  await p3.goto(`${BASE}/application/transactions`, { waitUntil: "networkidle2" });
+  await p3.goto(`${BASE}/account`, { waitUntil: "networkidle2" });
   check("deep link redirects to login", p3.url().includes("/auth/login"));
   await p3.type('input[name="email"]', email);
   await p3.type('input[name="password"]', password);
   await p3.click('button[type="submit"]');
-  await waitForPath(p3, /^\/application/);
+  await waitForPath(p3, /^\/account/);
   await waitForApp(p3);
   check("returns user to the originally requested page",
-    new URL(p3.url()).pathname === "/application/transactions",
+    new URL(p3.url()).pathname === "/account",
     `url=${new URL(p3.url()).pathname}`);
 
   // ---------- 7. wrong password through the real form ----------
@@ -253,14 +251,14 @@ try {
 
   // ---------- 8. logout ----------
   console.log("\n=== H. LOGOUT ===");
-  await p3.goto(`${BASE}/application/dashboard`, { waitUntil: "networkidle2" });
-  const logoutBtn = await p3.$('button::-p-text(Log out)');
-  check("logout button is present", !!logoutBtn);
+  await p3.goto(`${BASE}/account`, { waitUntil: "networkidle2" });
+  const logoutBtn = await p3.$('button::-p-text(Sign out)');
+  check("sign-out button is present", !!logoutBtn);
   await logoutBtn?.click();
   await sleep(4000);
-  check("logout clears the session cookie",
+  check("sign-out clears the session cookie",
     !(await p3.cookies()).some((c) => c.name === "authjs.session-token" && c.value));
-  await p3.goto(`${BASE}/application/dashboard`, { waitUntil: "networkidle2" });
+  await p3.goto(`${BASE}/account`, { waitUntil: "networkidle2" });
   check("logged-out user is bounced back to login", p3.url().includes("/auth/login"));
   check("signed-out visitor can still load the login form",
     new URL(p3.url()).pathname === "/auth/login", `url=${new URL(p3.url()).pathname}`);
@@ -274,14 +272,14 @@ try {
   await p5.type('input[name="email"]', email);
   await p5.type('input[name="password"]', password);
   await p5.click('button[type="submit"]');
-  await waitForPath(p5, /^\/application/);
+  await waitForPath(p5, /^\/account/);
   await p5.goto(`${BASE}/auth/login`, { waitUntil: "networkidle2" });
   check("signed-in user is redirected off /auth/login",
-    new URL(p5.url()).pathname === "/application/dashboard",
+    new URL(p5.url()).pathname === "/account",
     `url=${new URL(p5.url()).pathname}`);
   await p5.goto(`${BASE}/auth/signup`, { waitUntil: "networkidle2" });
   check("signed-in user is redirected off /auth/signup",
-    new URL(p5.url()).pathname === "/application/dashboard",
+    new URL(p5.url()).pathname === "/account",
     `url=${new URL(p5.url()).pathname}`);
   await ctx9.close();
 

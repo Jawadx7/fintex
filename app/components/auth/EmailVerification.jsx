@@ -2,12 +2,13 @@
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/app/components/ui/button";
+import { getPostLoginPath } from "@/lib/auth/redirects";
 
 const EmailVerification = () => {
   const router = useRouter();
   const handleEmailCheck = (e) => {
     e.preventDefault();
-    router.push("/application/dashboard");
+    router.push(getPostLoginPath());
   };
 
   return (

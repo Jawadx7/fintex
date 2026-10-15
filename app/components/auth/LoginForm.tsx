@@ -8,6 +8,7 @@ import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { authenticateUser, type AuthActionState } from "@/app/actions/auth";
+import { getPostLoginPath } from "@/lib/auth/redirects";
 
 const initialState: AuthActionState = {};
 
@@ -27,7 +28,7 @@ const LoginForm = () => {
     const callbackUrl = new URLSearchParams(window.location.search).get(
       "callbackUrl"
     );
-    router.push(callbackUrl ?? "/application/dashboard");
+    router.push(callbackUrl ?? getPostLoginPath());
     router.refresh();
   }, [state.success, router]);
 

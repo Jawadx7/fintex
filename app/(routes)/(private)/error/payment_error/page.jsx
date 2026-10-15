@@ -1,10 +1,11 @@
 import ButtonLink from "../../../../components/ButtonLink";
+import { getPostLoginPath } from "@/lib/auth/redirects";
 
 const page = () => {
   return (
     <main className="p-5">
       <div>Payment Error</div>
-      <ButtonLink path="/application/dashboard" text="Go to Dashboard" />
+      <ButtonLink path={getPostLoginPath()} text="Go to Account" />
     </main>
   );
 };

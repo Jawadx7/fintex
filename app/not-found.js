@@ -17,8 +17,8 @@ const NotFound = () => {
         <Link href="/">
           <PrimaryButton text="Go Back Home" />
         </Link>
-        <Link href="/application/dashboard">
-          <PrimaryButton text="See Dashboard" />
+        <Link href="/account">
+          <PrimaryButton text="Go to Account" />
         </Link>
       </div>
     </div>

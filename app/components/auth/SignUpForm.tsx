@@ -16,6 +16,7 @@ import {
   type AuthActionState,
 } from "@/app/actions/auth";
 import type { FieldErrors } from "@/lib/validation";
+import { getPostLoginPath } from "@/lib/auth/redirects";
 
 const initialState: AuthActionState = {};
 
@@ -156,7 +157,7 @@ export default function SignUpForm() {
   // Step 2 succeeding -> the profile is complete, so enter the app.
   useEffect(() => {
     if (!profileState.success) return;
-    router.push("/application/dashboard");
+    router.push(getPostLoginPath());
     router.refresh();
   }, [profileState.success, router]);
 
