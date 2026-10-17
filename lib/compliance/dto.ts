@@ -21,7 +21,8 @@ export interface AlertListItem {
   senderWallet: string;
   receiverWallet: string;
   senderBalanceBefore: string | null;
-  riskScore: number;
+  // Null when the assessment was produced in rules-only mode (no model).
+  riskScore: number | null;
   tier: AlertTier;
   action: AlertAction;
   tags: string[];

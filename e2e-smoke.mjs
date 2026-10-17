@@ -36,11 +36,41 @@ const waitForPath = (page, re, timeout = 45000) =>
     re.source,
   );
 
-// The URL flips before React paints the account page, so wait for the account
-// header (sign-out button) before asserting on rendered content.
+// The URL flips before React paints the account page, so wait for the app
+// shell (the topbar user-menu trigger) before asserting on rendered content.
 const waitForApp = (page, timeout = 45000) =>
   page
-    .waitForSelector('button::-p-text(Sign out)', { timeout, polling: 300 })
+    .waitForSelector('button[aria-label="Open user menu"]', {
+      timeout,
+      polling: 300,
+    })
+    .catch(() => {});
+
+// The compliance dashboard renders skeleton rows while its queries resolve, so
+// wait for real content (the showing-range label plus the loaded summary card)
+// before reading the body or clicking a row.
+const waitForDashboard = (page, timeout = 30000) =>
+  page
+    .waitForFunction(
+      () => {
+        const text = document.body.innerText;
+        return (
+          /Showing \d+\u2013\d+ of \d+/.test(text) && /\bFlagged\b/.test(text)
+        );
+      },
+      { timeout, polling: 150 },
+    )
+    .catch(() => {});
+
+// Waits for a specific showing-range window (used to confirm a page change has
+// actually rendered, rather than reading during the skeleton state).
+const waitForRange = (page, re, timeout = 30000) =>
+  page
+    .waitForFunction(
+      (src) => new RegExp(src).test(document.body.innerText),
+      { timeout, polling: 150 },
+      re.source,
+    )
     .catch(() => {});
 
 const typeInto = async (page, name, value) => {
@@ -270,12 +300,24 @@ try {
   // ---------- 8. logout ----------
   console.log("\n=== H. LOGOUT ===");
   await p3.goto(`${BASE}/account`, { waitUntil: "networkidle2" });
-  const logoutBtn = await p3.$('button::-p-text(Sign out)');
-  check("sign-out button is present", !!logoutBtn);
-  await logoutBtn?.click();
-  await sleep(4000);
-  check("sign-out clears the session cookie",
-    !(await p3.cookies()).some((c) => c.name === "authjs.session-token" && c.value));
+  await waitForApp(p3);
+  const menuTrigger = await p3.$('button[aria-label="Open user menu"]');
+  check("user-menu trigger is present", !!menuTrigger);
+  // Sign out lives inside the user dropdown, so open it before clicking.
+  await menuTrigger?.click();
+  const signOutItem = await p3
+    .waitForSelector("button::-p-text(Sign out)", { timeout: 10000, polling: 200 })
+    .catch(() => null);
+  check("sign-out control is present in the menu", !!signOutItem);
+  await signOutItem?.click();
+  // Sign-out is a server action; poll until the session cookie is gone instead
+  // of guessing with a fixed sleep.
+  const signOutCleared = async () =>
+    !(await p3.cookies()).some(
+      (c) => c.name === "authjs.session-token" && c.value,
+    );
+  for (let i = 0; i < 80 && !(await signOutCleared()); i++) await sleep(250);
+  check("sign-out clears the session cookie", await signOutCleared());
   await p3.goto(`${BASE}/account`, { waitUntil: "networkidle2" });
   check("logged-out user is bounced back to login", p3.url().includes("/auth/login"));
   check("signed-out visitor can still load the login form",
@@ -544,7 +586,7 @@ try {
 
   // Dashboard renders the table and honours the tier filter from the URL.
   await pK3.goto(`${BASE}/admin/compliance?tier=HIGH`, { waitUntil: "networkidle2" });
-  await pK3.waitForSelector("table tbody tr", { timeout: 25000 }).catch(() => {});
+  await waitForDashboard(pK3);
   const highRowCount = await pK3.$$eval("table tbody tr", (rows) => rows.length).catch(() => 0);
   const dashBody = await pK3.$eval("body", (e) => e.innerText);
   check("dashboard renders alert rows from the tier filter", highRowCount > 0, `rows=${highRowCount}`);
@@ -557,7 +599,7 @@ try {
 
   // Page lives in the URL and changes the visible window.
   await pK3.goto(`${BASE}/admin/compliance?tier=HIGH&page=2`, { waitUntil: "networkidle2" });
-  await pK3.waitForSelector("table tbody tr", { timeout: 25000 }).catch(() => {});
+  await waitForRange(pK3, /Showing 11\u2013\d+ of \d+/);
   const page2Body = await pK3.$eval("body", (e) => e.innerText);
   check("page=2 is kept in the URL",
     new URL(pK3.url()).searchParams.get("page") === "2");
@@ -565,7 +607,7 @@ try {
     /Showing 11\u2013\d+ of \d+/.test(page2Body));
 
   // Back from detail returns to the same page + filters.
-  await pK3.click("table tbody tr");
+  await pK3.click("table tbody tr").catch(() => {});
   await pK3
     .waitForFunction(() => /Why this was flagged/.test(document.body.innerText), { timeout: 25000 })
     .catch(() => {});
@@ -576,8 +618,8 @@ try {
     fromParam.includes("page=2") && fromParam.includes("tier=HIGH"),
     `from=${fromParam}`);
 
-  await pK3.click('a::-p-text(Back to alerts)');
-  await pK3.waitForSelector("table tbody tr", { timeout: 25000 }).catch(() => {});
+  await pK3.click('a::-p-text(Back to alerts)').catch(() => {});
+  await waitForDashboard(pK3);
   const backUrl = new URL(pK3.url());
   check("back returns to the same page + filters",
     backUrl.pathname === "/admin/compliance" &&
@@ -635,13 +677,19 @@ try {
     document.documentElement.classList.contains("dark"));
   check("account area honours the dark preference", accountDark === true, `dark=${accountDark}`);
 
-  // Public routes stay light under the same dark preference.
+  // Public routes stay light under the same dark preference. These must be
+  // checked signed-out: a signed-in visitor is redirected off /auth/* into the
+  // app area, which is dark by design.
+  const ctxPublic = await browser.createBrowserContext();
+  const pPublic = await ctxPublic.newPage();
+  await pPublic.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "dark" }]);
   for (const route of ["/", "/auth/login", "/auth/signup"]) {
-    await pK3.goto(`${BASE}${route}`, { waitUntil: "networkidle2" });
-    const dark = await pK3.evaluate(() =>
+    await pPublic.goto(`${BASE}${route}`, { waitUntil: "networkidle2" });
+    const dark = await pPublic.evaluate(() =>
       document.documentElement.classList.contains("dark"));
     check(`${route} stays light for a dark-preferring visitor`, dark === false, `dark=${dark}`);
   }
+  await ctxPublic.close();
 
   // Toggling inside the app stores an explicit light preference.
   await pK3.goto(`${BASE}/admin/compliance`, { waitUntil: "networkidle2" });

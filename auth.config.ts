@@ -20,15 +20,17 @@ export const authConfig = {
     jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        // `user` is `User | AdapterUser`; the AdapterUser variant has no role,
-        // so read it off our augmented User type.
+        // `user` is `User | AdapterUser`; the AdapterUser variant has no role or
+        // tenant, so read them off our augmented User type.
         token.role = (user as User).role;
+        token.tenantId = (user as User).tenantId ?? null;
       }
       return token;
     },
     session({ session, token }) {
       if (token.id) session.user.id = token.id as string;
       if (token.role) session.user.role = token.role;
+      session.user.tenantId = (token.tenantId as string | null) ?? null;
       return session;
     },
   },

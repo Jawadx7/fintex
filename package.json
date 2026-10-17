@@ -14,6 +14,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
+    "tenant:create": "tsx scripts/create-tenant.ts",
+    "key:create": "tsx scripts/create-api-key.ts",
     "postinstall": "prisma generate",
     "e2e": "node e2e-smoke.mjs"
   },

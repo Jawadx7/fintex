@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import type { Session } from "next-auth";
 
-import { assertAdmin } from "@/lib/auth/guards";
+import { assertAdminTenant } from "@/lib/auth/guards";
 import { getAlertDetail, updateReview } from "@/lib/compliance/queries";
 import { ReviewUpdateSchema } from "@/lib/compliance/schemas";
 
@@ -10,11 +9,11 @@ export const dynamic = "force-dynamic";
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, context: RouteContext) {
-  const result = await assertAdmin();
-  if (result instanceof NextResponse) return result;
+  const guard = await assertAdminTenant();
+  if (guard instanceof NextResponse) return guard;
 
   const { id } = await context.params;
-  const detail = await getAlertDetail(id);
+  const detail = await getAlertDetail(guard.tenantId, id);
 
   if (!detail) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -24,9 +23,8 @@ export async function GET(_request: Request, context: RouteContext) {
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
-  const result = await assertAdmin();
-  if (result instanceof NextResponse) return result;
-  const session = result as Session;
+  const guard = await assertAdminTenant();
+  if (guard instanceof NextResponse) return guard;
 
   const { id } = await context.params;
 
@@ -45,7 +43,12 @@ export async function PATCH(request: Request, context: RouteContext) {
     );
   }
 
-  const outcome = await updateReview(id, parsed.data, session.user.id);
+  const outcome = await updateReview(
+    guard.tenantId,
+    id,
+    parsed.data,
+    guard.userId
+  );
 
   if (!outcome.ok) {
     if (outcome.reason === "not_found") {

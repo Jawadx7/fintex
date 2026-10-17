@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "modelType": "logistic_regression",
+  "modelVersion": "sample-a-2026-10-20",
+  "intercept": -4.2,
+  "features": [
+    {
+      "name": "amount_log",
+      "source": "amount",
+      "transform": { "type": "log1p" },
+      "coefficient": 0.8,
+      "mean": 6.1,
+      "std": 1.9
+    },
+    {
+      "name": "is_transfer",
+      "source": "type",
+      "transform": { "type": "onehot", "value": "TRANSFER" },
+      "coefficient": 0.6,
+      "mean": 0.3,
+      "std": 0.46
+    },
+    {
+      "name": "hour_sin",
+      "source": "derived.hourOfDay",
+      "transform": { "type": "cyclic_sin", "period": 24 },
+      "coefficient": -0.2,
+      "mean": 0.0,
+      "std": 0.7
+    },
+    {
+      "name": "recent_sim_swap",
+      "source": "attributes.sim_swap_days",
+      "transform": { "type": "clip", "min": 0, "max": 30 },
+      "coefficient": -0.05,
+      "mean": 20,
+      "std": 9,
+      "missing": 30
+    }
+  ],
+  "thresholds": { "medium": 0.3, "high": 0.7 },
+  "metadata": {
+    "trainedOn": "PaySim (synthetic)",
+    "notes": "sample/placeholder, not a trained model",
+    "metrics": { "prAuc": 0.0 }
+  }
+}

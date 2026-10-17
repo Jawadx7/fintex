@@ -51,7 +51,9 @@ function toListItemFromTransaction(
     senderWallet: tx.senderWallet,
     receiverWallet: tx.receiverWallet,
     senderBalanceBefore: tx.senderBalanceBefore?.toString() ?? null,
-    riskScore: a?.riskScore ?? 0,
+    // Null (rendered as "—") when there is no assessment, or when the
+    // assessment ran in rules-only mode with no model score.
+    riskScore: a?.riskScore ?? null,
     tier: a?.tier ?? "LOW",
     action: a?.action ?? "ALLOW",
     tags: a?.tags ?? [],
@@ -86,6 +88,7 @@ export interface ListAlertsParams {
 
 /** Newest-first, page-paginated alert list. Excludes LOW unless asked. */
 export async function listAlerts(
+  tenantId: string,
   params: ListAlertsParams
 ): Promise<AlertsPage> {
   const {
@@ -101,7 +104,7 @@ export async function listAlerts(
 
   const size = normalizePageSize(pageSize);
 
-  const transactionWhere: Prisma.TransactionWhereInput = {};
+  const transactionWhere: Prisma.TransactionWhereInput = { tenantId };
   const since = rangeToSince(range);
   if (since) transactionWhere.occurredAt = { gte: since };
   if (q) {
@@ -113,7 +116,7 @@ export async function listAlerts(
     ];
   }
 
-  const where: Prisma.RiskAssessmentWhereInput = {};
+  const where: Prisma.RiskAssessmentWhereInput = { tenantId };
   if (tier) {
     where.tier = tier;
   } else if (!includeCleared) {
@@ -152,19 +155,21 @@ export async function listAlerts(
 
 /** Aggregate totals, per-day series and per-tag counts for a time range. */
 export async function getSummary(
+  tenantId: string,
   range: RangeKey = "all"
 ): Promise<AlertSummary> {
   const since = rangeToSince(range);
-  const occurredAtFilter = since ? { gte: since } : undefined;
+  const occurredAt = since ? { gte: since } : undefined;
 
   const [totalTransactions, assessments] = await Promise.all([
     prisma.transaction.count({
-      where: occurredAtFilter ? { occurredAt: occurredAtFilter } : {},
+      where: { tenantId, ...(occurredAt ? { occurredAt } : {}) },
     }),
     prisma.riskAssessment.findMany({
-      where: occurredAtFilter
-        ? { transaction: { occurredAt: occurredAtFilter } }
-        : {},
+      where: {
+        tenantId,
+        ...(occurredAt ? { transaction: { occurredAt } } : {}),
+      },
       include: { transaction: { select: { occurredAt: true } } },
     }),
   ]);
@@ -180,9 +185,12 @@ export async function getSummary(
 }
 
 /** Full alert detail incl. related transactions and sender history. */
-export async function getAlertDetail(id: string): Promise<AlertDetail | null> {
-  const assessment = await prisma.riskAssessment.findUnique({
-    where: { id },
+export async function getAlertDetail(
+  tenantId: string,
+  id: string
+): Promise<AlertDetail | null> {
+  const assessment = await prisma.riskAssessment.findFirst({
+    where: { id, tenantId },
     include: {
       transaction: true,
       reviewedBy: {
@@ -199,12 +207,13 @@ export async function getAlertDetail(id: string): Promise<AlertDetail | null> {
   const [related, history] = await Promise.all([
     relatedIds.length
       ? prisma.transaction.findMany({
-          where: { id: { in: relatedIds } },
+          where: { tenantId, id: { in: relatedIds } },
           include: { assessment: true },
         })
       : Promise.resolve<TransactionWithAssessment[]>([]),
     prisma.transaction.findMany({
       where: {
+        tenantId,
         senderWallet: tx.senderWallet,
         occurredAt: {
           gte: new Date(tx.occurredAt.getTime() - HISTORY_WINDOW_MS),
@@ -250,12 +259,13 @@ export type ReviewResult =
  * reviewStatus null) cannot be moved into a review state.
  */
 export async function updateReview(
+  tenantId: string,
   id: string,
   update: { status: AlertReviewStatus; note?: string },
   reviewedById: string
 ): Promise<ReviewResult> {
-  const existing = await prisma.riskAssessment.findUnique({
-    where: { id },
+  const existing = await prisma.riskAssessment.findFirst({
+    where: { id, tenantId },
     select: { reviewStatus: true },
   });
 
@@ -272,7 +282,7 @@ export async function updateReview(
     },
   });
 
-  const detail = await getAlertDetail(id);
+  const detail = await getAlertDetail(tenantId, id);
   if (!detail) return { ok: false, reason: "not_found" };
   return { ok: true, detail };
 }

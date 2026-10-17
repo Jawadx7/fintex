@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "modelType": "logistic_regression",
+  "modelVersion": "sample-b-2026-10-20",
+  "intercept": -1.1,
+  "features": [
+    {
+      "name": "amount_log",
+      "source": "amount",
+      "transform": { "type": "log1p" },
+      "coefficient": 1.7,
+      "mean": 5.2,
+      "std": 1.4
+    },
+    {
+      "name": "is_transfer",
+      "source": "type",
+      "transform": { "type": "onehot", "value": "TRANSFER" },
+      "coefficient": -0.9,
+      "mean": 0.5,
+      "std": 0.5
+    },
+    {
+      "name": "hour_cos",
+      "source": "derived.hourOfDay",
+      "transform": { "type": "cyclic_cos", "period": 24 },
+      "coefficient": 0.4,
+      "mean": 0.0,
+      "std": 0.7
+    }
+  ],
+  "thresholds": { "medium": 0.4, "high": 0.8 },
+  "metadata": {
+    "trainedOn": "PaySim (synthetic)",
+    "notes": "sample/placeholder with different coefficients so a swap changes scores"
+  }
+}

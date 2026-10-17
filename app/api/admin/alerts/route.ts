@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { assertAdmin } from "@/lib/auth/guards";
+import { assertAdminTenant } from "@/lib/auth/guards";
 import {
   DEFAULT_PAGE_SIZE,
   MAX_PAGE_SIZE,
@@ -34,8 +34,8 @@ const QuerySchema = z.object({
 });
 
 export async function GET(request: Request) {
-  const result = await assertAdmin();
-  if (result instanceof NextResponse) return result;
+  const guard = await assertAdminTenant();
+  if (guard instanceof NextResponse) return guard;
 
   const { searchParams } = new URL(request.url);
   const raw: Record<string, string> = {};
@@ -51,6 +51,6 @@ export async function GET(request: Request) {
     );
   }
 
-  const page = await listAlerts(parsed.data);
+  const page = await listAlerts(guard.tenantId, parsed.data);
   return NextResponse.json(page);
 }

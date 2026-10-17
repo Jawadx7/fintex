@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "name": "strict-pack",
+  "tierActions": { "LOW": "ALLOW", "MEDIUM": "REVIEW", "HIGH": "HOLD_AND_ALERT" },
+  "rules": [
+    {
+      "id": "full_balance_drain",
+      "tag": "FULL_BALANCE_DRAIN",
+      "label": "Full balance drain",
+      "enabled": true,
+      "severity": "HIGH",
+      "reason": "The sender moves essentially their entire balance in one transaction to a recipient with no prior history with the sender.",
+      "when": {
+        "all": [
+          { "field": "type", "op": "in", "value": ["TRANSFER", "CASH_OUT"] },
+          { "field": "amount", "op": "gte", "value": 100 },
+          { "field": "amount", "op": "gte", "valueRef": { "field": "sender.balanceBefore", "factor": 0.95 } },
+          { "history": { "scope": "pair", "window_minutes": 10080, "metric": "count" }, "op": "lt", "value": 1 }
+        ]
+      }
+    },
+    {
+      "id": "large_amount",
+      "tag": "LARGE_AMOUNT",
+      "label": "Large amount",
+      "enabled": true,
+      "severity": "MEDIUM",
+      "reason": "The transaction amount exceeds the strict-pack review threshold of GHS 500.",
+      "when": {
+        "all": [{ "field": "amount", "op": "gte", "value": 500 }]
+      }
+    },
+    {
+      "id": "rapid_sequence",
+      "tag": "RAPID_SEQUENCE",
+      "label": "Rapid sequence",
+      "enabled": true,
+      "severity": "MEDIUM",
+      "reason": "A burst of outbound transactions from the same wallet within minutes.",
+      "when": {
+        "all": [
+          { "history": { "scope": "sender_outgoing", "window_minutes": 15, "metric": "count" }, "op": "gte", "value": 1 }
+        ]
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { assertAdmin } from "@/lib/auth/guards";
+import { assertAdminTenant } from "@/lib/auth/guards";
 import { getSummary } from "@/lib/compliance/queries";
 
 export const dynamic = "force-dynamic";
@@ -11,8 +11,8 @@ const QuerySchema = z.object({
 });
 
 export async function GET(request: Request) {
-  const result = await assertAdmin();
-  if (result instanceof NextResponse) return result;
+  const guard = await assertAdminTenant();
+  if (guard instanceof NextResponse) return guard;
 
   const { searchParams } = new URL(request.url);
   const raw: Record<string, string> = {};
@@ -28,6 +28,6 @@ export async function GET(request: Request) {
     );
   }
 
-  const summary = await getSummary(parsed.data.range);
+  const summary = await getSummary(guard.tenantId, parsed.data.range);
   return NextResponse.json(summary);
 }

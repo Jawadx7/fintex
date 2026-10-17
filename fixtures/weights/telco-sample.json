@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "modelType": "logistic_regression",
+  "modelVersion": "telco-sample-2026-10-20",
+  "intercept": -3.5,
+  "features": [
+    {
+      "name": "amount_log",
+      "source": "amount",
+      "transform": { "type": "log1p" },
+      "coefficient": 0.7,
+      "mean": 6.0,
+      "std": 1.8
+    },
+    {
+      "name": "recent_sim_swap",
+      "source": "attributes.sim_swap_days",
+      "transform": { "type": "clip", "min": 0, "max": 30 },
+      "coefficient": 0.9,
+      "mean": 20,
+      "std": 9,
+      "missing": 30
+    },
+    {
+      "name": "new_device",
+      "source": "attributes.new_device",
+      "transform": { "type": "onehot", "value": true },
+      "coefficient": 0.5,
+      "mean": 0.2,
+      "std": 0.4
+    }
+  ],
+  "thresholds": { "medium": 0.3, "high": 0.7 },
+  "metadata": {
+    "trainedOn": "telco sample (placeholder)",
+    "notes": "uses tenant-defined attributes; not a trained model"
+  }
+}

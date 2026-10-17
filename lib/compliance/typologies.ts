@@ -13,11 +13,6 @@ export interface Typology {
   tag: TypologyTag;
   /** Human label for badges and headings. */
   label: string;
-  /**
-   * Tier the pattern implies on its own. The engine may escalate
-   * (e.g. FULL_BALANCE_DRAIN -> HIGH when the recipient is a brand-new wallet).
-   */
-  baseTier: "MEDIUM" | "HIGH";
   /** One-line summary for tables/tooltips. */
   summary: string;
   /** Longer explanation shown on the alert detail page. */
@@ -28,7 +23,6 @@ export const TYPOLOGIES: Record<TypologyTag, Typology> = {
   FULL_BALANCE_DRAIN: {
     tag: "FULL_BALANCE_DRAIN",
     label: "Full balance drain",
-    baseTier: "MEDIUM",
     summary: "Account emptied in a single outbound transfer.",
     description:
       "The sender moves essentially their entire balance in one transaction. " +
@@ -39,7 +33,6 @@ export const TYPOLOGIES: Record<TypologyTag, Typology> = {
   THRESHOLD_SKIRTING: {
     tag: "THRESHOLD_SKIRTING",
     label: "Threshold skirting",
-    baseTier: "HIGH",
     summary: "Several transfers sized just below a reporting threshold.",
     description:
       "Multiple transfers are deliberately kept just under a reporting or " +
@@ -49,7 +42,6 @@ export const TYPOLOGIES: Record<TypologyTag, Typology> = {
   RAPID_SEQUENCE: {
     tag: "RAPID_SEQUENCE",
     label: "Rapid sequence",
-    baseTier: "MEDIUM",
     summary: "Several transactions from one wallet in a short window.",
     description:
       "A burst of outbound transactions from the same wallet within minutes. " +
@@ -59,7 +51,6 @@ export const TYPOLOGIES: Record<TypologyTag, Typology> = {
   PASS_THROUGH: {
     tag: "PASS_THROUGH",
     label: "Pass-through",
-    baseTier: "HIGH",
     summary: "Funds received and immediately cashed out.",
     description:
       "An inbound transfer is followed within minutes by an outbound cash-out " +

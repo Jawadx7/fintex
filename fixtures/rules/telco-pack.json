@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "name": "telco-pack",
+  "tierActions": { "LOW": "ALLOW", "MEDIUM": "REVIEW", "HIGH": "HOLD_AND_ALERT" },
+  "rules": [
+    {
+      "id": "telco_sim_swap_new_device",
+      "tag": "SIM_SWAP",
+      "label": "Recent SIM swap on a new device",
+      "enabled": true,
+      "severity": "HIGH",
+      "reason": "A recent SIM swap combined with a new device is a strong account-takeover signal.",
+      "when": {
+        "all": [
+          { "field": "attributes.sim_swap_days", "op": "lte", "value": 3 },
+          { "field": "attributes.new_device", "op": "eq", "value": true }
+        ]
+      }
+    },
+    {
+      "id": "large_amount",
+      "tag": "LARGE_AMOUNT",
+      "label": "Large amount",
+      "enabled": true,
+      "severity": "MEDIUM",
+      "reason": "The transaction amount exceeds the telco review threshold of GHS 1000.",
+      "when": {
+        "all": [{ "field": "amount", "op": "gte", "value": 1000 }]
+      }
+    }
+  ]
+}

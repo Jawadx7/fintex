@@ -32,9 +32,9 @@ export function formatDateTime(value: string | Date): string {
   }).format(date);
 }
 
-/** Render a 0–1 risk score as a percentage. */
-export function formatRiskScore(score: number): string {
-  if (!Number.isFinite(score)) return "—";
+/** Render a 0–1 risk score as a percentage, or "—" when absent. */
+export function formatRiskScore(score: number | null | undefined): string {
+  if (score == null || !Number.isFinite(score)) return "—";
   return `${Math.round(score * 100)}%`;
 }
 

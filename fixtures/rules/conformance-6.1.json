@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "name": "default-pack",
+  "tierActions": { "LOW": "ALLOW", "MEDIUM": "REVIEW", "HIGH": "HOLD_AND_ALERT" },
+  "rules": [
+    {
+      "id": "full_balance_drain",
+      "tag": "FULL_BALANCE_DRAIN",
+      "label": "Full balance drain",
+      "enabled": true,
+      "severity": "HIGH",
+      "reason": "Account emptied in a single outbound transfer to a recipient with no prior history.",
+      "when": {
+        "all": [
+          { "field": "amount", "op": "gte", "value": 100 },
+          { "field": "sender.balanceBefore", "op": "exists" }
+        ]
+      }
+    }
+  ]
+}

@@ -13,57 +13,155 @@ datasource db {
 // Auth.js v5 uses JWT sessions, so no Session/VerificationToken tables are
 // needed. Users here are app accounts (staff or customers), not OAuth accounts.
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String    @id @default(cuid())
+  email        String    @unique
   passwordHash String
   firstName    String
   lastName     String
-  role         Role     @default(USER)
+  role         Role      @default(USER)
+  tenantId     String?
   address      String?
   country      String?
   postalCode   String?
   birthDate    DateTime?
   idNumber     String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  riskReviews RiskAssessment[] @relation("Reviewer")
+  tenant               Tenant?          @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  riskReviews          RiskAssessment[] @relation("Reviewer")
+  createdModelVersions ModelVersion[]   @relation("CreatedModelVersions")
+  createdRulesVersions RulesVersion[]   @relation("CreatedRulesVersions")
+
+  @@index([tenantId])
 }
 
-// Wallet-based transaction scored by the compliance engine. This is the output
-// contract the future scoring pipeline writes; see lib/compliance/schemas.ts.
-model Transaction {
-  id                  String          @id @default(cuid())
-  idempotencyKey      String          @unique
-  type                TransactionType
-  amount              Decimal         @db.Decimal(14, 2)
-  currency            String          @default("GHS")
-  senderWallet        String
-  receiverWallet      String
-  senderBalanceBefore Decimal?        @db.Decimal(14, 2)
-  occurredAt          DateTime
-  createdAt           DateTime        @default(now())
+// A scoring customer. Created by seed/script only (D7); no self-serve signup.
+// The `active*VersionId` pointers are the only mutable state on a version row.
+model Tenant {
+  id                   String   @id @default(cuid())
+  slug                 String   @unique
+  name                 String
+  createdAt            DateTime @default(now())
+  activeModelVersionId String?  @unique
+  activeRulesVersionId String?  @unique
 
+  activeModelVersion ModelVersion?    @relation("TenantActiveModel", fields: [activeModelVersionId], references: [id], onDelete: SetNull)
+  activeRulesVersion RulesVersion?    @relation("TenantActiveRules", fields: [activeRulesVersionId], references: [id], onDelete: SetNull)
+  users              User[]
+  apiKeys            ApiKey[]
+  modelVersions      ModelVersion[]   @relation("TenantModelVersions")
+  rulesVersions      RulesVersion[]   @relation("TenantRulesVersions")
+  transactions       Transaction[]
+  riskAssessments    RiskAssessment[]
+}
+
+// Bearer keys for /api/v1. Only the SHA-256 hash is stored; `prefix` is the
+// non-secret lookup id and is unique. `hash` is never returned by the API.
+model ApiKey {
+  id         String    @id @default(cuid())
+  tenantId   String
+  name       String
+  prefix     String    @unique
+  hash       String
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+// Immutable, versioned, per-tenant logistic-regression weights (D4/D6).
+model ModelVersion {
+  id          String   @id @default(cuid())
+  tenantId    String
+  version     String
+  weights     Json
+  createdAt   DateTime @default(now())
+  createdById String?
+  note        String?
+
+  tenant          Tenant           @relation("TenantModelVersions", fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy       User?            @relation("CreatedModelVersions", fields: [createdById], references: [id], onDelete: SetNull)
+  activeForTenant Tenant?          @relation("TenantActiveModel")
+  assessments     RiskAssessment[]
+
+  @@unique([tenantId, version])
+  @@index([tenantId, createdAt])
+}
+
+// Immutable, versioned, per-tenant declarative rules pack (D3/D6).
+model RulesVersion {
+  id            String   @id @default(cuid())
+  tenantId      String
+  versionNumber Int
+  config        Json
+  createdAt     DateTime @default(now())
+  createdById   String?
+  note          String?
+
+  tenant          Tenant           @relation("TenantRulesVersions", fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy       User?            @relation("CreatedRulesVersions", fields: [createdById], references: [id], onDelete: SetNull)
+  activeForTenant Tenant?          @relation("TenantActiveRules")
+  assessments     RiskAssessment[]
+
+  @@unique([tenantId, versionNumber])
+  @@index([tenantId, createdAt])
+}
+
+// Wallet-based transaction scored by the scoring service. `attributes` is the
+// free-form, tenant-defined bag weights and rules can reference by name.
+model Transaction {
+  id                    String          @id @default(cuid())
+  tenantId              String
+  idempotencyKey        String
+  externalId            String?
+  type                  TransactionType
+  amount                Decimal         @db.Decimal(14, 2)
+  currency              String          @default("GHS")
+  senderWallet          String
+  receiverWallet        String
+  senderBalanceBefore   Decimal?        @db.Decimal(14, 2)
+  receiverBalanceBefore Decimal?        @db.Decimal(14, 2)
+  attributes            Json            @default("{}")
+  occurredAt            DateTime
+  createdAt             DateTime        @default(now())
+
+  tenant     Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   assessment RiskAssessment?
 
-  // The rules engine looks up wallet history by time window.
-  @@index([senderWallet, occurredAt])
-  @@index([receiverWallet, occurredAt])
+  // Idempotency is per tenant, not global.
+  @@unique([tenantId, idempotencyKey])
+  // Tenant-first lookup indexes: history windows and the alerts list.
+  @@index([tenantId, occurredAt])
+  @@index([tenantId, senderWallet, occurredAt])
+  @@index([tenantId, receiverWallet, occurredAt])
+  @@index([tenantId, externalId])
 }
 
 // One-to-one scoring result for a Transaction.
 model RiskAssessment {
-  id            String       @id @default(cuid())
-  transactionId String       @unique
-  riskScore     Float
-  tier          RiskTier
-  action        RiskAction
-  tags          String[]
-  reasons       String[]
-  evidence      Json?
-  modelVersion  String
-  latencyMs     Int?
-  createdAt     DateTime     @default(now())
+  id               String      @id @default(cuid())
+  tenantId         String
+  transactionId    String      @unique
+  riskScore        Float?
+  tier             RiskTier
+  action           RiskAction
+  tags             String[]
+  reasons          String[]
+  reasonsDetail    Json?
+  evidence         Json?
+  contributions    Json?
+  mode             ScoringMode
+  historyAvailable Boolean     @default(false)
+  historyTruncated Boolean     @default(false)
+  skippedRules     Json        @default("[]")
+  imputedFeatures  Json        @default("[]")
+  modelVersion     String
+  latencyMs        Int?
+  createdAt        DateTime    @default(now())
 
   // Review workflow. A null reviewStatus means no review is required.
   reviewStatus ReviewStatus?
@@ -71,11 +169,22 @@ model RiskAssessment {
   reviewedAt   DateTime?
   reviewNote   String?
 
-  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
-  reviewedBy  User?       @relation("Reviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  transaction     Transaction   @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  tenant          Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  modelVersionRef ModelVersion? @relation(fields: [modelVersionId], references: [id], onDelete: SetNull)
+  // Rules versions are never deleted, so a required relation with the default
+  // Restrict action is safe and matches the "every assessment records the
+  // versions that produced it" rule (D6).
+  rulesVersion    RulesVersion  @relation(fields: [rulesVersionId], references: [id])
+  reviewedBy      User?         @relation("Reviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
 
-  @@index([tier, createdAt])
-  @@index([reviewStatus])
+  modelVersionId String?
+  rulesVersionId String
+
+  @@index([tenantId, tier, createdAt])
+  @@index([tenantId, reviewStatus])
+  @@index([modelVersionId])
+  @@index([rulesVersionId])
 }
 
 enum Role {
@@ -105,4 +214,9 @@ enum ReviewStatus {
   ESCALATED
   DISMISSED
   CONFIRMED
+}
+
+enum ScoringMode {
+  MODEL_AND_RULES
+  RULES_ONLY
 }

@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "name": "default-pack",
+  "tierActions": { "LOW": "ALLOW", "MEDIUM": "REVIEW", "HIGH": "HOLD_AND_ALERT" },
+  "rules": [
+    {
+      "id": "full_balance_drain",
+      "tag": "FULL_BALANCE_DRAIN",
+      "label": "Full balance drain",
+      "enabled": true,
+      "severity": "HIGH",
+      "reason": "The sender moves essentially their entire balance in one transaction to a recipient with no prior history with the sender.",
+      "when": {
+        "all": [
+          { "field": "type", "op": "in", "value": ["TRANSFER", "CASH_OUT"] },
+          { "field": "amount", "op": "gte", "value": 100 },
+          { "field": "amount", "op": "gte", "valueRef": { "field": "sender.balanceBefore", "factor": 0.95 } },
+          { "history": { "scope": "pair", "window_minutes": 10080, "metric": "count" }, "op": "lt", "value": 1 }
+        ]
+      }
+    },
+    {
+      "id": "full_balance_drain_known_recipient",
+      "tag": "FULL_BALANCE_DRAIN",
+      "label": "Full balance drain",
+      "enabled": true,
+      "severity": "MEDIUM",
+      "reason": "The sender moves essentially their entire balance in a single outbound transfer.",
+      "when": {
+        "all": [
+          { "field": "type", "op": "in", "value": ["TRANSFER", "CASH_OUT"] },
+          { "field": "amount", "op": "gte", "value": 100 },
+          { "field": "amount", "op": "gte", "valueRef": { "field": "sender.balanceBefore", "factor": 0.95 } }
+        ]
+      }
+    },
+    {
+      "id": "threshold_skirting",
+      "tag": "THRESHOLD_SKIRTING",
+      "label": "Threshold skirting",
+      "enabled": true,
+      "severity": "MEDIUM",
+      "reason": "Multiple transfers are deliberately kept just under a reporting threshold to avoid scrutiny (structuring).",
+      "when": {
+        "all": [
+          { "field": "amount", "op": "gte", "value": 1800 },
+          { "field": "amount", "op": "lt", "value": 2000 },
+          {
+            "history": {
+              "scope": "sender_outgoing",
+              "window_minutes": 1440,
+              "metric": "count",
+              "filter": { "types": ["TRANSFER", "CASH_OUT"], "amount_gte": 1800, "amount_lte": 1999.99 }
+            },
+            "op": "gte",
+            "value": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "rapid_sequence",
+      "tag": "RAPID_SEQUENCE",
+      "label": "Rapid sequence",
+      "enabled": true,
+      "severity": "MEDIUM",
+      "reason": "A burst of outbound transactions from the same wallet within minutes.",
+      "when": {
+        "all": [
+          { "history": { "scope": "sender_outgoing", "window_minutes": 15, "metric": "count" }, "op": "gte", "value": 3 }
+        ]
+      }
+    },
+    {
+      "id": "pass_through",
+      "tag": "PASS_THROUGH",
+      "label": "Pass-through",
+      "enabled": true,
+      "severity": "HIGH",
+      "reason": "An inbound transfer is followed within minutes by an outbound transfer of a near-identical amount, leaving little value behind.",
+      "when": {
+        "all": [
+          { "field": "type", "op": "in", "value": ["TRANSFER", "CASH_OUT"] },
+          { "history": { "scope": "sender_incoming", "window_minutes": 60, "metric": "sum_amount" }, "op": "gte", "valueRef": { "field": "amount", "factor": 0.9 } },
+          { "history": { "scope": "sender_incoming", "window_minutes": 60, "metric": "sum_amount" }, "op": "lte", "valueRef": { "field": "amount", "factor": 1.1 } }
+        ]
+      }
+    }
+  ]
+}
